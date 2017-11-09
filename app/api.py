@@ -32,6 +32,12 @@ logger.addHandler(shandler)
 ht = Hottop()
 
 
+@app.route('/a')
+def roaot():
+    """Render the root."""
+    return render_template('a.html')
+
+
 @app.route('/')
 @app.route('/roast')
 def root():

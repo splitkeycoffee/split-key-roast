@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Highchart Tester</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="resources/external/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="resources/external/bootstrap/assets/css/sticky-footer-navbar.css" rel="stylesheet">
+    <link rel="stylesheet" href="resources/external/font-awesome/css/font-awesome.min.css" type="text/css">
+    <link rel="stylesheet" href="resources/external/jquery-ui/jquery-ui.min.css" type="text/css">
+
+    <!-- JS -->
+    <script type="text/javascript" src="resources/external/socket.io.min.js"></script>
+    <script src="resources/external/jquery.min.js"></script>
+    <script src="resources/external/jquery-ui/jquery-ui.min.js"></script>
+
+    <link href="resources/css/dashboard.css" rel="stylesheet">
+
+    <style type="text/css">
+      .btn {
+        margin: 10px;
+      }
+      #container {
+        min-height: 500px;
+        min-width: 500px;
+        max-width: 1300px;
+        max-height: 1000px;
+      }
+      #auxiliary {
+        min-height: 100px;
+        min-width: 500px;
+        max-width: 1300px;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <header>
+      <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <a class="navbar-brand" href="#">Split Key Coffee</a>
+        <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="/roast">Roast <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="#">Inventory</span></a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="#">Settings</span></a>
+            </li>
+          </ul>
+          <div class="mt-2 mt-md-0">
+            <i id="status" class="fa fa-circle disconnected" aria-hidden="true"></i>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <div class="container-fluid">
+      <div class="row">
+        <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar">
+          <h5 class="nav-link">Controls</h5>
+          <button id="export-png" class="btn btn-sm btn-primary">Export to PNG</button>
+        </nav>
+
+        <main role="main" class="col-sm-9 ml-sm-auto col-md-10 pt-3">
+          <div id="container" class="graph"></div>
+          <div id="auxiliary" class="graph"></div>
+        </main>
+      </div>
+    </div>
+
+    <footer class="footer navbar-dark bg-dark">
+      <div class="container">
+        <span class="text-muted">Hottop Web is maintained by Brandon Dixon.</span>
+      </div>
+    </footer>
+
+    <script src="resources/external/highcharts/highcharts.js"></script>
+    <script src="http://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/offline-exporting.js"></script>
+
+    <script src="resources/js/test-graph.js"></script>
+    <script src="resources/external/bootstrap/assets/js/vendor/popper.min.js"></script>
+    <script src="resources/external/bootstrap/js/bootstrap.min.js"></script>
+  </body>
+</html>
+
