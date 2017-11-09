@@ -65,6 +65,20 @@
       .slider {
         margin-bottom: 10px;
       }
+      #container {
+        min-height: 500px;
+        min-width: 500px;
+        max-width: 1300px;
+        max-height: 1000px;
+      }
+      #auxiliary {
+        min-height: 100px;
+        min-width: 500px;
+        max-width: 1300px;
+      }
+      .tbl-label {
+        text-align: center;
+      }
     </style>
   </head>
 
@@ -103,6 +117,7 @@
           <!-- <button class="btn btn-sm btn-primary mock" type="button" action="true">Mock</button> -->
           <button class="btn btn-sm btn-primary setup" type="button" action="true">Setup</button>
           <button class="btn btn-sm btn-primary shutdown" type="button" action="true">Shutdown</button>
+          <button id="export-png" class="btn btn-sm btn-primary">Save Graph</button>
 
           <h5 class="nav-link">Drum Motor</h5>
           <button id="drum-motor-btn" class="btn btn-sm toggle-control" type="button" action=""></button>
@@ -125,54 +140,37 @@
         </nav>
 
         <main role="main" class="col-sm-9 ml-sm-auto col-md-10 pt-3">
-          <div id="container" class="graph"></div>
-          <hr/>
           <table class="table table-sm table-bordered">
             <thead>
               <tr>
-                <th scope="col">Setting</th>
-                <th scope="col">Value</th>
+                <th scope="col" class="tbl-label">ET</th>
+                <th scope="col" class="tbl-label">BT</th>
+                <th scope="col" class="tbl-label">Heater</th>
+                <th scope="col" class="tbl-label">Fan</th>
+                <th scope="col" class="tbl-label">Main Fan</th>
+                <th scope="col" class="tbl-label">Solenoid</th>
+                <th scope="col" class="tbl-label">Drum Motor</th>
+                <th scope="col" class="tbl-label">Cooling Motor</th>
+                <th scope="col" class="tbl-label">Chaff Tray</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>Environment Temperature</td>
-                <td><span id="external-temp" class='reading'></span></td>
-              </tr>
-              <tr>
-                <td>Bean Temperature</td>
-                <td><span id="bean-temp" class='reading'></span></td>
-              </tr>
-              <tr>
-                <td>Heater</td>
-                <td><span id="heater" class='reading'></span></td>
-              </tr>
-              <tr>
-                <td>Fan</td>
-                <td><span id="fan" class='reading'></span></td>
-              </tr>
-              <tr>
-                <td>Main Fan</td>
-                <td><span id="main-fan" class='reading'></span></td>
-              </tr>
-              <tr>
-                <td>Solenoid</td>
-                <td><span id="solenoid" class='reading'></span></td>
-              </tr>
-              <tr>
-                <td>Drum Motor</td>
-                <td><span id="drum-motor" class='reading'></span></td>
-              </tr>
-              <tr>
-                <td>Cooling Motor</td>
-                <td><span id="cooling-motor" class='reading'></span></td>
-              </tr>
-              <tr>
-                <td>Chaff Tray</td>
-                <td><span id="chaff-tray" class='reading'></span></td>
+                <td><span id="external-temp" class='reading'>-1</span></td>
+                <td><span id="bean-temp" class='reading'>-1</span></td>
+                <td><span id="heater" class='reading'>-1</span></td>
+                <td><span id="fan" class='reading'>-1</span></td>
+                <td><span id="main-fan" class='reading'>-1</span></td>
+                <td><span id="solenoid" class='reading'>-1</span></td>
+                <td><span id="drum-motor" class='reading'>-1</span></td>
+                <td><span id="cooling-motor" class='reading'>-1</span></td>
+                <td><span id="chaff-tray" class='reading'>-1</span></td>
               </tr>
             </tbody>
           </table>
+          <hr/>
+          <div id="container" class="graph"></div>
+          <div id="auxiliary" class="graph"></div>
         </main>
       </div>
     </div>
@@ -197,6 +195,9 @@
     });
     </script>
     <script src="resources/external/highcharts/highcharts.js"></script>
+    <script src="http://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/offline-exporting.js"></script>
+
     <script src="resources/js/graph.js"></script>
     <script src="resources/js/hottop.js"></script>
     <script src="resources/external/bootstrap/assets/js/vendor/popper.min.js"></script>
