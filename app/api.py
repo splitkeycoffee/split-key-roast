@@ -1,7 +1,7 @@
 """Provide websocket and admin functions for hottop."""
 
 from flask import Flask
-from flask import render_template, redirect, url_for, flash
+from flask import render_template, redirect, url_for
 from flask import request
 from flask_login import (
     LoginManager, login_user, logout_user, login_required, current_user
@@ -64,6 +64,12 @@ def unauthorized():
 """Web-based routes to serve the application."""
 
 
+@app.route('/debug')
+def debug():
+    """Render the index page."""
+    return render_template('debug.html')
+
+
 @app.route('/')
 def root():
     """Render the index page."""
@@ -81,9 +87,10 @@ def login():
         if user and User.validate_login(user['password'], form.password.data):
             user_obj = User(user)
             login_user(user_obj, remember=True)
-            flash("Logged in successfully", category='success')
+            # flash("Logged in successfully", category='success')
             next = request.args.get('next')
             return redirect(next or url_for('root'))
+    logger.debug("Return")
     return render_template('login.html')
 
 
@@ -105,7 +112,6 @@ def register():
                 'password': generate_password_hash(form.password.data)}
         logger.debug("User: %s" % user)
         _id = c.insert(user)
-        flash("Registration successful", category='success')
         next = request.args.get('next')
         return redirect(next or url_for('login'))
     errors = ','.join([value[0] for value in form.errors.values()])
