@@ -1,185 +1,75 @@
+{% extends "layout/base.html" %}
+{% block title %}Active Roast{% endblock %}
+{% block head %}
+    {{ super() }}
+    <link href="resources/css/roast.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+  <div class="row">
+    <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar">
+      <h5 class="nav-link">Controls  <i id="status" class="fa fa-circle disconnected" aria-hidden="true"></i></h5>
+      <!-- <button class="btn btn-sm btn-primary mock" type="button" action="true">Mock</button> -->
+      <button class="btn btn-sm btn-primary setup" type="button" action="true">Setup</button>
+      <button class="btn btn-sm btn-primary shutdown" type="button" action="true">Shutdown</button>
+      <button id="export-png" class="btn btn-sm btn-primary">Save Graph</button>
 
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+      <h5 class="nav-link">Drum Motor</h5>
+      <button id="drum-motor-btn" class="btn btn-sm toggle-control" type="button" action=""></button>
 
-    <title>Web Roast</title>
+      <h5 class="nav-link">Stirring Motor</h5>
+      <button id="cooling-motor-btn" class="btn btn-sm toggle-control" type="button" action=""></button>
 
-    <!-- Bootstrap core CSS -->
-    <link href="resources/external/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+      <h5 class="nav-link">Drum Hatch</h5>
+      <button id="solenoid-btn" class="btn btn-sm toggle-control" type="button" action=""></button>
 
-    <!-- Custom styles for this template -->
-    <link href="resources/external/bootstrap/assets/css/sticky-footer-navbar.css" rel="stylesheet">
-    <link rel="stylesheet" href="resources/external/font-awesome/css/font-awesome.min.css" type="text/css">
-    <link rel="stylesheet" href="resources/external/jquery-ui/jquery-ui.min.css" type="text/css">
-
-    <!-- JS -->
-    <script type="text/javascript" src="resources/external/socket.io.min.js"></script>
-    <script src="resources/external/jquery.min.js"></script>
-    <script src="resources/external/jquery-ui/jquery-ui.min.js"></script>
-
-    <link href="resources/css/dashboard.css" rel="stylesheet">
-
-    <style type="text/css">
-      .btn {
-        margin: 10px;
-      }
-      .disconnected {
-        color: red;
-      }
-      .connected {
-        color: #60b660;
-      }
-      .fa-circle {
-        font-size: 30px;
-      }
-      #container {
-        height: 300px;
-        min-width: 500px;
-        max-width: 1300px;
-      }
-      .ui-slider {
-        width: 150px;
-        margin-left: 20px;
-      }
-      #fan-handle {
-        width: 2em;
-        height: 1.5em;
-        top: 50%;
-        margin-top: -.8em;
-        text-align: center;
-        line-height: 1.6em;
-      }
-      #heat-handle {
-        width: 2em;
-        height: 1.5em;
-        top: 50%;
-        margin-top: -.8em;
-        text-align: center;
-        line-height: 1.6em;
-      }
-      .slider {
-        margin-bottom: 10px;
-      }
-      #container {
-        min-height: 500px;
-        min-width: 500px;
-        max-width: 1300px;
-        max-height: 1000px;
-      }
-      #auxiliary {
-        min-height: 100px;
-        min-width: 500px;
-        max-width: 1300px;
-      }
-      .tbl-label {
-        text-align: center;
-      }
-    </style>
-  </head>
-
-  <body>
-
-    <header>
-      <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-        <a class="navbar-brand" href="#">Split Key Coffee</a>
-        <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-          <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-              <a class="nav-link" href="/roast">Roast <span class="sr-only">(current)</span></a>
-            </li>
-            <li class="nav-item active">
-              <a class="nav-link" href="#">Inventory</span></a>
-            </li>
-            <li class="nav-item active">
-              <a class="nav-link" href="#">Settings</span></a>
-            </li>
-          </ul>
-          <div class="mt-2 mt-md-0">
-            <i id="status" class="fa fa-circle disconnected" aria-hidden="true"></i>
-          </div>
-        </div>
-      </nav>
-    </header>
-
-    <div class="container-fluid">
-      <div class="row">
-        <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar">
-          <h5 class="nav-link">Controls</h5>
-          <!-- <button class="btn btn-sm btn-primary mock" type="button" action="true">Mock</button> -->
-          <button class="btn btn-sm btn-primary setup" type="button" action="true">Setup</button>
-          <button class="btn btn-sm btn-primary shutdown" type="button" action="true">Shutdown</button>
-          <button id="export-png" class="btn btn-sm btn-primary">Save Graph</button>
-
-          <h5 class="nav-link">Drum Motor</h5>
-          <button id="drum-motor-btn" class="btn btn-sm toggle-control" type="button" action=""></button>
-
-          <h5 class="nav-link">Stirring Motor</h5>
-          <button id="cooling-motor-btn" class="btn btn-sm toggle-control" type="button" action=""></button>
-
-          <h5 class="nav-link">Drum Hatch</h5>
-          <button id="solenoid-btn" class="btn btn-sm toggle-control" type="button" action=""></button>
-
-          <h5 class="nav-link">Fan</h5>
-          <div id="fan-slider" class="slider">
-            <div id="fan-handle" class="ui-slider-handle"></div>
-          </div>
-
-          <h5 class="nav-link">Heat</h5>
-          <div id="heat-slider" class="slider">
-            <div id="heat-handle" class="ui-slider-handle"></div>
-          </div>
-        </nav>
-
-        <main role="main" class="col-sm-9 ml-sm-auto col-md-10 pt-3">
-          <table class="table table-sm table-bordered">
-            <thead>
-              <tr>
-                <th scope="col" class="tbl-label">ET</th>
-                <th scope="col" class="tbl-label">BT</th>
-                <th scope="col" class="tbl-label">Heater</th>
-                <th scope="col" class="tbl-label">Fan</th>
-                <th scope="col" class="tbl-label">Main Fan</th>
-                <th scope="col" class="tbl-label">Solenoid</th>
-                <th scope="col" class="tbl-label">Drum Motor</th>
-                <th scope="col" class="tbl-label">Cooling Motor</th>
-                <th scope="col" class="tbl-label">Chaff Tray</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><span id="external-temp" class='reading'>-1</span></td>
-                <td><span id="bean-temp" class='reading'>-1</span></td>
-                <td><span id="heater" class='reading'>-1</span></td>
-                <td><span id="fan" class='reading'>-1</span></td>
-                <td><span id="main-fan" class='reading'>-1</span></td>
-                <td><span id="solenoid" class='reading'>-1</span></td>
-                <td><span id="drum-motor" class='reading'>-1</span></td>
-                <td><span id="cooling-motor" class='reading'>-1</span></td>
-                <td><span id="chaff-tray" class='reading'>-1</span></td>
-              </tr>
-            </tbody>
-          </table>
-          <hr/>
-          <div id="container" class="graph"></div>
-          <div id="auxiliary" class="graph"></div>
-        </main>
+      <h5 class="nav-link">Fan</h5>
+      <div id="fan-slider" class="slider">
+        <div id="fan-handle" class="ui-slider-handle"></div>
       </div>
-    </div>
 
-    <footer class="footer navbar-dark bg-dark">
-      <div class="container">
-        <span class="text-muted">Hottop Web is maintained by Brandon Dixon.</span>
+      <h5 class="nav-link">Heat</h5>
+      <div id="heat-slider" class="slider">
+        <div id="heat-handle" class="ui-slider-handle"></div>
       </div>
-    </footer>
+    </nav>
+
+    <main role="main" class="col-sm-9 ml-sm-auto col-md-10 pt-3">
+      <table class="table table-sm table-bordered">
+        <thead>
+          <tr>
+            <th scope="col" class="tbl-label">ET</th>
+            <th scope="col" class="tbl-label">BT</th>
+            <th scope="col" class="tbl-label">Heater</th>
+            <th scope="col" class="tbl-label">Fan</th>
+            <th scope="col" class="tbl-label">Main Fan</th>
+            <th scope="col" class="tbl-label">Solenoid</th>
+            <th scope="col" class="tbl-label">Drum Motor</th>
+            <th scope="col" class="tbl-label">Cooling Motor</th>
+            <th scope="col" class="tbl-label">Chaff Tray</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span id="external-temp" class='reading'>-1</span></td>
+            <td><span id="bean-temp" class='reading'>-1</span></td>
+            <td><span id="heater" class='reading'>-1</span></td>
+            <td><span id="fan" class='reading'>-1</span></td>
+            <td><span id="main-fan" class='reading'>-1</span></td>
+            <td><span id="solenoid" class='reading'>-1</span></td>
+            <td><span id="drum-motor" class='reading'>-1</span></td>
+            <td><span id="cooling-motor" class='reading'>-1</span></td>
+            <td><span id="chaff-tray" class='reading'>-1</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <hr/>
+      <div id="container" class="graph"></div>
+      <div id="auxiliary" class="graph"></div>
+    </main>
+  </div>
+{% endblock %}
+{% block bottom_import %}
+    {{ super() }}
     <script type="text/javascript">
     $("#fan-slider").slider({
       range: "min", value: 0, min: 0, max: 10,
@@ -200,7 +90,4 @@
 
     <script src="resources/js/graph.js"></script>
     <script src="resources/js/hottop.js"></script>
-    <script src="resources/external/bootstrap/assets/js/vendor/popper.min.js"></script>
-    <script src="resources/external/bootstrap/js/bootstrap.min.js"></script>
-  </body>
-</html>
+{% endblock %}

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- START: Head -->
+  <head>
+    {% block head %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>{% block title %}{% endblock %} - Cloud Cafe</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="resources/external/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="resources/external/bootstrap/assets/css/sticky-footer-navbar.css" rel="stylesheet">
+    <link rel="stylesheet" href="resources/external/font-awesome/css/font-awesome.min.css" type="text/css">
+    <link rel="stylesheet" href="resources/external/jquery-ui/jquery-ui.min.css" type="text/css">
+    <link href="resources/css/dashboard.css" rel="stylesheet">
+
+    <!-- JS -->
+    <script type="text/javascript" src="resources/external/socket.io.min.js"></script>
+    <script src="resources/external/jquery.min.js"></script>
+    <script src="resources/external/jquery-ui/jquery-ui.min.js"></script>
+    {% endblock %}
+  </head>
+  <!-- END: Head -->
+
+  <body>
+
+    <!-- START: Header -->
+    <header>
+
+      <!-- START: Navigation -->
+      <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <a class="navbar-brand" href="/">Cloud Cafe</a>
+        <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="/roast">Roast</a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="/history">History</a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="/inventory">Inventory</span></a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="/settings">Settings</span></a>
+            </li>
+          </ul>
+          <div class="mt-2 mt-md-0">
+          </div>
+        </div>
+      </nav>
+      <!-- END: Navigation -->
+
+    </header>
+    <!-- END: Header -->
+
+    <!-- START: Content -->
+    <div class="container-fluid">
+    {% block content %}{% endblock %}
+    </div>
+    <!-- END: Content -->
+
+    <!-- START: Footer -->
+    <footer class="footer navbar-dark bg-dark">
+      <div class="container">
+      {% block footer %}
+        <span class="text-muted">Cloud Cafe is maintained by Brandon Dixon of Split Key Coffee. <i class="fa fa-heart-o" aria-hidden="true"></i></span>
+      </div>
+      {% endblock %}
+    </footer>
+    <!-- END: Footer -->
+
+    <!-- START: Bottom Imports -->
+    {% block bottom_import %}
+    <script src="resources/external/bootstrap/assets/js/vendor/popper.min.js"></script>
+    <script src="resources/external/bootstrap/js/bootstrap.min.js"></script>
+    {% endblock %}
+    <!-- END: Bottom Imports -->
+
+  </body>
+</html>

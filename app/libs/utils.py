@@ -13,3 +13,11 @@ def to_bool(value):
     if str(value).lower() in negative:
         return False
     raise Exception('Invalid value for boolean conversion: ' + str(value))
+
+
+def now_time(str=True):
+    """Get the current time and return it back to the app."""
+    import datetime
+    if str:
+        return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.datetime.now()

@@ -1,24 +1,24 @@
-"""Interface with the hottop roaster."""
+"""
+Interface with the hottop roaster through the serial port.
+
+"""
 
 import binascii
 import glob
 import logging
-import random
 import serial
 import sys
 import time
-from threading import Thread, Event
 from Queue import Queue
+from threading import Thread, Event
 
 
 class InvalidInput(Exception):
-
     """Exception to capture invalid input commands."""
     pass
 
 
 class SerialConnectionError(Exception):
-
     """Exception to capture serial connection issues."""
     pass
 
@@ -39,36 +39,6 @@ def hex2int(value):
 def celsius2fahrenheit(c):
     """Convert temperatures."""
     return (c * 1.8) + 32
-
-
-class MockProcess(Thread):
-
-    """Mock up a thread to play around with."""
-
-    def __init__(self, config, q, logger, callback=None):
-        Thread.__init__(self)
-        self._config = config
-        self._cb = callback
-        self._log = logger
-        self._q = q
-        self.exit = Event()
-
-        self._config['external_temp'] = 400
-
-    def run(self):
-        while not self._q.empty():
-            self._config = self._q.get()
-
-        while not self.exit.is_set():
-            self._config['external_temp'] -= random.randint(0, 3)
-            self._config['bean_temp'] += random.randint(0, 3)
-            self._cb(self._config)
-            time.sleep(1)
-
-    def shutdown(self):
-        """Register a shutdown event."""
-        self._log.debug("Shutdown initiated")
-        self.exit.set()
 
 
 class ControlProcess(Thread):

@@ -1,0 +1,94 @@
+{% extends "layout/base.html" %}
+{% block title %}Inventory{% endblock %}
+{% block head %}
+    {{ super() }}
+    <link href="resources/css/inventory.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+  <div class="row">
+
+    <div class="modal fade" id="inventoryModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">New Inventory</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form action="/add-inventory" method="POST">
+            <div class="modal-body">
+                <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput">Label</label>
+                  <input type="text" class="form-control" name="label" placeholder="Nano Challa Cooperative">
+                </div>
+                <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput2">Origin</label>
+                  <input type="text" class="form-control" name="origin" placeholder="Ethiopia">
+                </div>
+                <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput2">Process</label>
+                      <select name="method" class="form-control">
+                        <option value="Washed">Washed</option>
+                        <option value="Natural">Natural</option>
+                        <option value="Honey">Honey</option>
+                      </select>
+                </div>
+                <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput2">Stock (grams)</label>
+                  <input type="number" class="form-control" name="stock" placeholder="450">
+                </div>
+
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Add Coffee</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <main role="main" class="col-md-12 pt-3">
+      <h1>Inventory <span class="pull-right"><button class="btn btn-primary" type="button" data-toggle="modal" data-target="#inventoryModal">Add Inventory</button></h1>
+      <div class="table-responsive">
+        {% if inventory|count > 0 %}
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Origin</th>
+              <th>Process</th>
+              <th>Stock</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for item in inventory %}
+            <tr>
+              <td>{{item.get('label')}}</td>
+              <td>{{item.get('origin')}}</td>
+              <td>{{item.get('process')}}</td>
+              <td>{{item.get('stock')}}</td>
+              <td>
+                <button type="submit" class="btn btn-sm btn-primary">Edit</button>
+                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="card text-white bg-secondary">
+          <div class="card-body inventory-card">
+            <h4 class="card-title">You're Out of Beans</h4>
+            <p class="card-text">There's currently no coffee inside of your inventory. Once you add some beans, they will show up here!</p>
+          </div>
+        </div>
+        {% endif %}
+    </main>
+  </div>
+{% endblock %}
+{% block bottom_import %}
+    {{ super() }}
+{% endblock %}

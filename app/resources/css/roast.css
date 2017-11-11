@@ -1,0 +1,54 @@
+.btn {
+  margin: 10px;
+}
+.disconnected {
+  color: red;
+}
+.connected {
+  color: #60b660;
+}
+.fa-circle {
+  font-size: 20px;
+}
+#container {
+  height: 300px;
+  min-width: 500px;
+  max-width: 1300px;
+}
+.ui-slider {
+  width: 150px;
+  margin-left: 20px;
+}
+#fan-handle {
+  width: 2em;
+  height: 1.5em;
+  top: 50%;
+  margin-top: -.8em;
+  text-align: center;
+  line-height: 1.6em;
+}
+#heat-handle {
+  width: 2em;
+  height: 1.5em;
+  top: 50%;
+  margin-top: -.8em;
+  text-align: center;
+  line-height: 1.6em;
+}
+.slider {
+  margin-bottom: 10px;
+}
+#container {
+  min-height: 500px;
+  min-width: 500px;
+  max-width: 1300px;
+  max-height: 1000px;
+}
+#auxiliary {
+  min-height: 100px;
+  min-width: 500px;
+  max-width: 1300px;
+}
+.tbl-label {
+  text-align: center;
+}
