@@ -94,3 +94,20 @@
     height: 30px;
     line-height: 10px;
 }
+
+td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.etemp {
+    color: red;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.btemp {
+    color: #020c7d;
+    font-size: 16px;
+    font-weight: bold;
+}

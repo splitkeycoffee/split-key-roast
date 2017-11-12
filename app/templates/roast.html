@@ -65,34 +65,50 @@
     </nav>
 
     <main role="main" class="col-sm-9 ml-sm-auto col-md-10 pt-3">
-      <table class="table table-sm table-bordered">
-        <thead>
-          <tr>
-            <th scope="col" class="tbl-label">ET</th>
-            <th scope="col" class="tbl-label">BT</th>
-            <th scope="col" class="tbl-label">Heater</th>
-            <th scope="col" class="tbl-label">Fan</th>
-            <th scope="col" class="tbl-label">Main Fan</th>
-            <th scope="col" class="tbl-label">Solenoid</th>
-            <th scope="col" class="tbl-label">Drum Motor</th>
-            <th scope="col" class="tbl-label">Cooling Motor</th>
-            <th scope="col" class="tbl-label">Chaff Tray</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><span id="external-temp" class='reading'>-1</span></td>
-            <td><span id="bean-temp" class='reading'>-1</span></td>
-            <td><span id="heater" class='reading'>-1</span></td>
-            <td><span id="fan" class='reading'>-1</span></td>
-            <td><span id="main-fan" class='reading'>-1</span></td>
-            <td><span id="solenoid" class='reading'>-1</span></td>
-            <td><span id="drum-motor" class='reading'>-1</span></td>
-            <td><span id="cooling-motor" class='reading'>-1</span></td>
-            <td><span id="chaff-tray" class='reading'>-1</span></td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="row">
+        <div class="col-md-5">
+          <table class="table table-sm table-bordered">
+            <thead>
+              <tr>
+                <th scope="col" class="tbl-label etemp">Environment Temperature</th>
+                <th scope="col" class="tbl-label btemp">Bean Temperature</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span id="environment-temp" class='reading etemp'>-1</span></td>
+                <td><span id="bean-temp" class='reading btemp'>-1</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col-md-7">
+          <table class="table table-sm table-bordered">
+            <thead>
+              <tr>
+                <th scope="col" class="tbl-label">Heater</th>
+                <th scope="col" class="tbl-label">Fan</th>
+                <th scope="col" class="tbl-label">Main Fan</th>
+                <th scope="col" class="tbl-label">Solenoid</th>
+                <th scope="col" class="tbl-label">Drum Motor</th>
+                <th scope="col" class="tbl-label">Cooling Motor</th>
+                <th scope="col" class="tbl-label">Chaff Tray</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span id="heater" class='reading'>-1</span></td>
+                <td><span id="fan" class='reading'>-1</span></td>
+                <td><span id="main-fan" class='reading'>-1</span></td>
+                <td><span id="solenoid" class='reading'>-1</span></td>
+                <td><span id="drum-motor" class='reading'>-1</span></td>
+                <td><span id="cooling-motor" class='reading'>-1</span></td>
+                <td><span id="chaff-tray" class='reading'>-1</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
       <hr/>
       <div id="container" class="graph"></div>
       <div id="auxiliary" class="graph"></div>

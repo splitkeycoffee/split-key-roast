@@ -67,12 +67,15 @@ $(document).ready(function() {
     });
 
     socket.on('state', function(data) {
-        console.log(data);
         for (var key in data.config) {
             var id = "#" + key.replace('_', '-');
-            $(id).html(data.config[key]);
+            if (key === 'environment_temp' || key === 'bean_temp') {
+                $(id).html(data.config[key].toFixed(2));
+            } else {
+                $(id).html(data.config[key]);
+            }
         }
-        mainChart.series[0].addPoint([data.time, data.config.external_temp]);
+        mainChart.series[0].addPoint([data.time, data.config.environment_temp]);
         mainChart.series[1].addPoint([data.time, data.config.bean_temp]);
         // Normalize the fan data set to match the scale of heat
         auxChart.series[0].addPoint([data.time, data.config.main_fan * 10]);

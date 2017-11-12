@@ -68,11 +68,15 @@ class MockProcess(Thread):
         self.exit = Event()
 
     def run(self):
+        import random
+        self._config['environment_temp'] = 400
         while not self._q.empty():
             self._config = self._q.get()
 
         while not self.exit.is_set():
             self._log.debug("Thread pulse")
+            self._config['environment_temp'] -= random.uniform(0, 1)
+            self._config['bean_temp'] += random.uniform(0, 1)
             self._cb({'config': self._config})
             time.sleep(.5)
 
@@ -168,7 +172,7 @@ class ControlProcess(Thread):
         settings['fan'] = hex2int(buffer[11])
         settings['main_fan'] = hex2int(buffer[12])
         et = hex2int(buffer[23] + buffer[24])
-        settings['external_temp'] = celsius2fahrenheit(et)
+        settings['environment_temp'] = celsius2fahrenheit(et)
         bt = hex2int(buffer[25] + buffer[26])
         settings['bean_temp'] = celsius2fahrenheit(bt)
         settings['solenoid'] = hex2int(buffer[16])
@@ -305,7 +309,7 @@ class Hottop:
         self._config['solenoid'] = 0
         self._config['cooling_motor'] = 0
         self._config['interval'] = self.INTERVAL
-        self._config['external_temp'] = 0
+        self._config['environment_temp'] = 0
         self._config['bean_temp'] = 0
         self._config['chaff_tray'] = 1
 
