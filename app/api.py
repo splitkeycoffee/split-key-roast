@@ -1,7 +1,7 @@
 """Provide websocket and admin functions for hottop."""
 
 from flask import Flask
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, jsonify
 from flask import request
 from flask_login import (
     LoginManager, login_user, logout_user, login_required, current_user
@@ -9,6 +9,7 @@ from flask_login import (
 from flask_pymongo import PyMongo
 from flask_socketio import SocketIO
 from werkzeug.security import generate_password_hash
+from bson.objectid import ObjectId
 import eventlet
 import logging
 import socketio
@@ -19,13 +20,13 @@ from user import User
 
 from libs.hottop_thread import Hottop
 from libs.hottop_thread import SerialConnectionError
-from libs.utils import to_bool, now_time
+from libs.utils import to_bool, now_time, paranoid_clean
 
 eventlet.monkey_patch()
 
 app = Flask(__name__, static_folder='./resources')
 app.config['SECRET_KEY'] = 'iqR2cYJp93PuuO8VbK1Z'
-app.config['MONGO_DBNAME'] = 'cloudcafe'
+app.config['MONGO_DBNAME'] = 'cloud_cafe'
 app.config['USERS_COLLECTION'] = 'accounts'
 app.config['INVENTORY_COLLECTION'] = 'inventory'
 login_manager = LoginManager()
@@ -124,25 +125,59 @@ def inventory():
     """Render the inventory page."""
     c = mongo.db[app.config['INVENTORY_COLLECTION']]
     items = c.find({'user': current_user.get_id()})
-    items = [x for x in items]
-    return render_template('inventory.html', inventory=items)
+    output = list()
+    for x in items:
+        x['id'] = str(x['_id'])
+        output.append(x)
+    output.sort(key=lambda x: x['datetime'], reverse=True)
+    return render_template('inventory.html', inventory=output)
 
 
-@app.route('/add-inventory', methods=['POST'])
+@app.route('/inventory/add-inventory', methods=['POST'])
 @login_required
 def add_inventory():
     """Render the index page."""
     form = InventoryForm(request.form)
     if form.validate():
-        logger.debug("kklklklklklk")
         c = mongo.db[app.config['INVENTORY_COLLECTION']]
         item = {'label': form.label.data, 'origin': form.origin.data,
-                'process': form.method.data, 'stock': form.stock.data,
+                'process': form.method.data, 'stock': int(form.stock.data),
                 'datetime': now_time(), 'user': current_user.get_id()}
         _id = c.insert(item)
         return redirect(url_for('inventory'))
     errors = ','.join([value[0] for value in form.errors.values()])
-    return {'errors': errors}
+    return jsonify({'errors': errors})
+
+
+@app.route('/inventory/edit-inventory', methods=['POST'])
+@login_required
+def edit_inventory():
+    """Render the index page."""
+    form = InventoryForm(request.form)
+    if form.validate():
+        if 'inventory_id' not in request.form:
+            return jsonify({'success': False, 'error': 'ID not found in edit!'})
+        edit_id = paranoid_clean(request.form.get('inventory_id'))
+        c = mongo.db[app.config['INVENTORY_COLLECTION']]
+        item = {'label': form.label.data, 'origin': form.origin.data,
+                'process': form.method.data, 'stock': form.stock.data}
+        c.update({'_id': ObjectId(edit_id)}, {'$set': item})
+        return redirect(url_for('inventory'))
+    errors = ','.join([value[0] for value in form.errors.values()])
+    return jsonify({'errors': errors})
+
+
+@app.route('/inventory/remove-item', methods=['POST'])
+@login_required
+def remove_inventory():
+    """Render the index page."""
+    args = request.get_json()
+    if 'id' not in args:
+        return jsonify({'success': False, 'error': 'ID not found in request!'})
+    c = mongo.db[app.config['INVENTORY_COLLECTION']]
+    remove_id = paranoid_clean(args.get('id'))
+    c.remove({'_id': ObjectId(remove_id)})
+    return jsonify({'success': True})
 
 
 @app.route('/settings')
@@ -163,7 +198,14 @@ def history():
 @login_required
 def active_roast():
     """Render the roast page."""
-    return render_template('roast.html')
+    c = mongo.db[app.config['INVENTORY_COLLECTION']]
+    items = c.find({'user': current_user.get_id()})
+    output = list()
+    for x in items:
+        x['id'] = str(x['_id'])
+        output.append(x)
+    output.sort(key=lambda x: x['datetime'], reverse=True)
+    return render_template('roast.html', inventory=output)
 
 
 """Websocket routes to perform management of the roast."""

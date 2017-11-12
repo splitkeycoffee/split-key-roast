@@ -4,6 +4,7 @@ Interface with the hottop roaster through the serial port.
 """
 
 import binascii
+import datetime
 import glob
 import logging
 import serial
@@ -39,6 +40,46 @@ def hex2int(value):
 def celsius2fahrenheit(c):
     """Convert temperatures."""
     return (c * 1.8) + 32
+
+
+def now_time():
+    """Get the current time."""
+    return datetime.datetime.now()
+
+
+def timedelta2millisecond(td):
+    """Get milliseconds from a timedelta."""
+    milliseconds = td.days * 24 * 60 * 60 * 1000
+    milliseconds += td.seconds * 1000
+    milliseconds += td.microseconds / 1000
+    return milliseconds
+
+
+class MockProcess(Thread):
+
+    """Mock up a thread to play around with."""
+
+    def __init__(self, config, q, logger, callback=None):
+        Thread.__init__(self)
+        self._config = config
+        self._cb = callback
+        self._log = logger
+        self._q = q
+        self.exit = Event()
+
+    def run(self):
+        while not self._q.empty():
+            self._config = self._q.get()
+
+        while not self.exit.is_set():
+            self._log.debug("Thread pulse")
+            self._cb({'config': self._config})
+            time.sleep(.5)
+
+    def shutdown(self):
+        """Register a shutdown event."""
+        self._log.debug("Shutdown initiated")
+        self.exit.set()
 
 
 class ControlProcess(Thread):
@@ -195,6 +236,9 @@ class Hottop:
         self._log = self._logger()
         self._conn = None
         self._roast = list()
+        self._roasting = False
+        self._roast_start = None
+        self._roast_end = None
         self._config = dict()
         self._q = Queue()
         self._init_controls()
@@ -267,6 +311,10 @@ class Hottop:
 
     def _callback(self, data):
         """Processor callback to clean-up stream data."""
+        if not self._roast_start:
+            return
+        td = (now_time() - self._roast_start)
+        data['time'] = (td.total_seconds() + 60) / 60
         self._log.debug(data)
         self._roast.append(data)
         if self._user_callback:
@@ -276,15 +324,20 @@ class Hottop:
     def start(self, func=None):
         """Start the roaster process."""
         self._user_callback = func
-        self._process = ControlProcess(self._conn, self._config, self._q,
-                                       self._log, callback=self._callback)
-        # self._process = MockProcess(self._config, self._q, self._log,
-        #                             callback=self._callback)
+        # self._process = ControlProcess(self._conn, self._config, self._q,
+        #                                self._log, callback=self._callback)
+        self._process = MockProcess(self._config, self._q, self._log,
+                                    callback=self._callback)
+        self._roast_start = now_time()
+        self._log.debug(self._roast_start)
         self._process.start()
+        self._roasting = True
 
     def end(self):
         """End the roaster process."""
         self._process.shutdown()
+        self._roasting = False
+        self._roast_end = now_time()
 
     def drop(self):
         """Preset call to drop coffee from the roaster."""

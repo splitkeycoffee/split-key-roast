@@ -7,7 +7,7 @@
 {% block content %}
   <div class="row">
     <main role="main" class="col-md-12 pt-3">
-      <h1>History <span class="pull-right"></h1>
+      <h1>History <span class="pull-right"><a href="/roast"><button class="btn btn-primary" type="button">New Roast</button></a></h1>
       <div class="table-responsive">
         {% if history|count > 0 %}
         <table class="table table-striped">
@@ -45,5 +45,4 @@
 {% endblock %}
 {% block bottom_import %}
     {{ super() }}
-    <script src="resources/js/hottop.js"></script>
 {% endblock %}

@@ -6,30 +6,61 @@
 {% endblock %}
 {% block content %}
   <div class="row">
-    <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar">
-      <h5 class="nav-link">Controls  <i id="status" class="fa fa-circle disconnected" aria-hidden="true"></i></h5>
-      <!-- <button class="btn btn-sm btn-primary mock" type="button" action="true">Mock</button> -->
-      <button class="btn btn-sm btn-primary setup" type="button" action="true">Setup</button>
-      <button class="btn btn-sm btn-primary shutdown" type="button" action="true">Shutdown</button>
-      <button id="export-png" class="btn btn-sm btn-primary">Save Graph</button>
+    <nav class="col-sm-4 col-md-2 d-none d-sm-block bg-light sidebar">
 
-      <h5 class="nav-link">Drum Motor</h5>
-      <button id="drum-motor-btn" class="btn btn-sm toggle-control" type="button" action=""></button>
+      <div id="roast-profile" class="">
+        <h4 class="sidebar-header">Roast</h4>
+        {% if inventory|count > 0 %}
+        <select id="inventory">
+          <option value="">Select coffee</option>
+          {% for item in inventory %}
+          <option id="{{item.get('id')}}" origin="{{item.get('origin')}}" value="{{item.get('label')}}">{{item.get('label')}}</option>
+          {% endfor %}
+        </select>
+        {% else %}
+          <a href="/inventory" class="logout"><button class="btn btn-sm btn-danger" type="button">Add Inventory</button></a>
+        {% endif %}
 
-      <h5 class="nav-link">Stirring Motor</h5>
-      <button id="cooling-motor-btn" class="btn btn-sm toggle-control" type="button" action=""></button>
-
-      <h5 class="nav-link">Drum Hatch</h5>
-      <button id="solenoid-btn" class="btn btn-sm toggle-control" type="button" action=""></button>
-
-      <h5 class="nav-link">Fan</h5>
-      <div id="fan-slider" class="slider">
-        <div id="fan-handle" class="ui-slider-handle"></div>
+        <h5 class="sidebar-header">Profile</h5>
+        <select id="history">
+          <option value="">Select profile</option>
+          <option value="manual">Manual</option>
+          {% for item in history %}
+          <option></option>
+          {% endfor %}
+        </select>
       </div>
 
-      <h5 class="nav-link">Heat</h5>
-      <div id="heat-slider" class="slider">
-        <div id="heat-handle" class="ui-slider-handle"></div>
+      <div id="roast-controls">
+        <h4 class="sidebar-header">Controls  <i id="status" class="fa fa-circle disconnected" aria-hidden="true"></i></h4>
+        <button class="btn btn-sm btn-secondary toggle-control margin-bottom-10 mock" type="button" action="true">Mock</button><br>
+        <button class="btn btn-sm btn-success toggle-control margin-bottom-10 setup" type="button" action="true">Start</button><br>
+        <button class="btn btn-sm btn-danger toggle-control margin-bottom-10 shutdown" type="button" action="true">Shutdown</button><br>
+
+        <h5 class="sidebar-header">Fan</h5>
+        <div id="fan-slider" class="slider">
+          <div id="fan-handle" class="ui-slider-handle"></div>
+        </div>
+
+        <h5 class="sidebar-header">Heat</h5>
+        <div id="heat-slider" class="slider">
+          <div id="heat-handle" class="ui-slider-handle"></div>
+        </div>
+
+        <h5 class="sidebar-header">Drum Motor</h5>
+        <button id="drum-motor-btn" class="btn btn-sm toggle-control sec-control" type="button" action=""></button>
+
+        <h5 class="sidebar-header">Stirring Motor</h5>
+        <button id="cooling-motor-btn" class="btn btn-sm toggle-control sec-control" type="button" action=""></button>
+
+        <h5 class="sidebar-header">Drum Hatch</h5>
+        <button id="solenoid-btn" class="btn btn-sm toggle-control sec-control margin-bottom-10" type="button" action=""></button>
+      </div>
+
+      <div id="roast-export">
+        <h4 class="sidebar-header">Export</h4>
+        <button id="export-png" class="btn btn-sm btn-primary toggle-control margin-bottom-10">Save Graph</button>
+        <button id="export-log" class="btn btn-sm btn-primary toggle-control margin-bottom-10">Save Log</button>
       </div>
     </nav>
 
@@ -90,4 +121,14 @@
 
     <script src="resources/js/graph.js"></script>
     <script src="resources/js/hottop.js"></script>
+
+    <script type="text/javascript">
+    $('#inventory').change(function() {
+      var selection = $(this).val();
+      var title = $('option:selected', this).attr('origin') + " - " + selection;
+      mainChart.setTitle({text: title});
+      $('#roast-controls').show().css('visibility', 'visible');
+      $('#roast-export').show().css('visibility', 'visible');
+    });
+    </script>
 {% endblock %}

@@ -5,3 +5,8 @@
 .inventory-card {
     text-align: center;
 }
+
+.hidden {
+    visibility: hidden;
+    display: none;
+}
