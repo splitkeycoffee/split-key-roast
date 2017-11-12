@@ -1,0 +1,12 @@
+.fa {
+  font-size: 20px;
+}
+
+.inventory-card {
+    text-align: center;
+}
+
+.hidden {
+    visibility: hidden;
+    display: none;
+}

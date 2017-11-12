@@ -1,0 +1,96 @@
+.sidebar-header {
+    margin-top: 10px;
+}
+
+.sidebar {
+    margin-left: 10px;
+    margin-bottom: 10px;
+}
+
+#roast-profile {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+}
+
+#roast-controls {
+    visibility: hidden;
+    display: none;
+}
+
+#roast-export {
+    visibility: hidden;
+    display: none;
+}
+
+.btn-pad {
+    margin: 10px;
+}
+
+.disconnected {
+    color: red;
+}
+
+.connected {
+    color: #60b660;
+}
+
+.fa-circle {
+    font-size: 20px;
+}
+
+#container {
+    height: 300px;
+    min-width: 500px;
+    max-width: 1300px;
+}
+
+.ui-slider {
+    width: 180px;
+    margin-left: 10px;
+}
+
+#fan-handle {
+    width: 2em;
+    height: 1.5em;
+    top: 50%;
+    margin-top: -.8em;
+    text-align: center;
+    line-height: 1.6em;
+}
+
+#heat-handle {
+    width: 2em;
+    height: 1.5em;
+    top: 50%;
+    margin-top: -.8em;
+    text-align: center;
+    line-height: 1.6em;
+}
+
+.slider {
+    margin-bottom: 10px;
+    margin-top: 15px;
+}
+
+#container {
+    min-height: 500px;
+    min-width: 500px;
+    max-width: 1300px;
+    max-height: 1000px;
+}
+
+#auxiliary {
+    min-height: 100px;
+    min-width: 500px;
+    max-width: 1300px;
+}
+
+.tbl-label {
+    text-align: center;
+}
+
+.toggle-control {
+    width: 95%;
+    height: 30px;
+    line-height: 10px;
+}

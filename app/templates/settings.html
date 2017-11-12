@@ -1,5 +1,5 @@
 {% extends "layout/base.html" %}
-{% block title %}Home{% endblock %}
+{% block title %}Settings{% endblock %}
 {% block head %}
     {{ super() }}
 {% endblock %}
@@ -7,11 +7,7 @@
   <div class="row">
 
     <main role="main" class="col-sm-9 ml-sm-auto col-md-12 pt-3">
-      <div class="mt-3">
-        {% if current_user.is_authenticated %}
-          <h1>{{ current_user.get_name() }}!</h1>
-        {% endif %}
-      </div>
+      <h1>Settings</h1>
     </main>
   </div>
 {% endblock %}

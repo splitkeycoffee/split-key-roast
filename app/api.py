@@ -1,23 +1,37 @@
 """Provide websocket and admin functions for hottop."""
 
 from flask import Flask
+from flask import render_template, redirect, url_for, jsonify
 from flask import request
-from flask import render_template
+from flask_login import (
+    LoginManager, login_user, logout_user, login_required, current_user
+)
 from flask_pymongo import PyMongo
 from flask_socketio import SocketIO
+from werkzeug.security import generate_password_hash
+from bson.objectid import ObjectId
 import eventlet
 import logging
 import socketio
 import sys
 
+from forms import LoginForm, RegisterForm, InventoryForm
+from user import User
+
 from libs.hottop_thread import Hottop
 from libs.hottop_thread import SerialConnectionError
-from libs.utils import to_bool
+from libs.utils import to_bool, now_time, paranoid_clean
 
 eventlet.monkey_patch()
+
 app = Flask(__name__, static_folder='./resources')
 app.config['SECRET_KEY'] = 'iqR2cYJp93PuuO8VbK1Z'
-app.config['MONGO_DBNAME'] = 'hottop'
+app.config['MONGO_DBNAME'] = 'cloud_cafe'
+app.config['USERS_COLLECTION'] = 'accounts'
+app.config['INVENTORY_COLLECTION'] = 'inventory'
+login_manager = LoginManager()
+login_manager.init_app(app)
+
 mgr = socketio.RedisManager('redis://')
 sio = SocketIO(app, client_manager=mgr)
 mongo = PyMongo(app)
@@ -31,18 +45,170 @@ logger.addHandler(shandler)
 
 ht = Hottop()
 
+"""Helper functions."""
 
-@app.route('/a')
-def roaot():
-    """Render the root."""
-    return render_template('a.html')
+
+@login_manager.user_loader
+def load_user(email):
+    c = mongo.db[app.config['USERS_COLLECTION']]
+    u = c.find_one({"email": email})
+    if not u:
+        return None
+    return User(u)
+
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    return redirect(url_for('login'))
+
+
+"""Web-based routes to serve the application."""
+
+
+@app.route('/debug')
+def debug():
+    """Render the index page."""
+    return render_template('debug.html')
 
 
 @app.route('/')
-@app.route('/roast')
 def root():
-    """Render the root."""
-    return render_template('roast.html')
+    """Render the index page."""
+    return render_template('index.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Handle the login process."""
+    form = LoginForm(request.form)
+    if request.method == 'POST' and form.validate():
+        c = mongo.db[app.config['USERS_COLLECTION']]
+        user = c.find_one({"email": form.email.data})
+        logger.debug("User: %s" % user)
+        if user and User.validate_login(user['password'], form.password.data):
+            user_obj = User(user)
+            login_user(user_obj, remember=True)
+            # flash("Logged in successfully", category='success')
+            next = request.args.get('next')
+            return redirect(next or url_for('root'))
+    logger.debug("Return")
+    return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+    """Handle the logout process."""
+    logout_user()
+    return redirect(url_for('login'))
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """Render the register page."""
+    form = RegisterForm(request.form)
+    if request.method == 'POST' and form.validate():
+        c = mongo.db[app.config['USERS_COLLECTION']]
+        user = {"email": form.email.data, "first_name": form.first_name.data,
+                "last_name": form.last_name.data,
+                'password': generate_password_hash(form.password.data)}
+        logger.debug("User: %s" % user)
+        _id = c.insert(user)
+        next = request.args.get('next')
+        return redirect(next or url_for('login'))
+    errors = ','.join([value[0] for value in form.errors.values()])
+    return render_template('register.html', message=errors)
+
+
+@app.route('/inventory')
+@login_required
+def inventory():
+    """Render the inventory page."""
+    c = mongo.db[app.config['INVENTORY_COLLECTION']]
+    items = c.find({'user': current_user.get_id()})
+    output = list()
+    for x in items:
+        x['id'] = str(x['_id'])
+        output.append(x)
+    output.sort(key=lambda x: x['datetime'], reverse=True)
+    return render_template('inventory.html', inventory=output)
+
+
+@app.route('/inventory/add-inventory', methods=['POST'])
+@login_required
+def add_inventory():
+    """Render the index page."""
+    form = InventoryForm(request.form)
+    if form.validate():
+        c = mongo.db[app.config['INVENTORY_COLLECTION']]
+        item = {'label': form.label.data, 'origin': form.origin.data,
+                'process': form.method.data, 'stock': int(form.stock.data),
+                'datetime': now_time(), 'user': current_user.get_id()}
+        _id = c.insert(item)
+        return redirect(url_for('inventory'))
+    errors = ','.join([value[0] for value in form.errors.values()])
+    return jsonify({'errors': errors})
+
+
+@app.route('/inventory/edit-inventory', methods=['POST'])
+@login_required
+def edit_inventory():
+    """Render the index page."""
+    form = InventoryForm(request.form)
+    if form.validate():
+        if 'inventory_id' not in request.form:
+            return jsonify({'success': False, 'error': 'ID not found in edit!'})
+        edit_id = paranoid_clean(request.form.get('inventory_id'))
+        c = mongo.db[app.config['INVENTORY_COLLECTION']]
+        item = {'label': form.label.data, 'origin': form.origin.data,
+                'process': form.method.data, 'stock': form.stock.data}
+        c.update({'_id': ObjectId(edit_id)}, {'$set': item})
+        return redirect(url_for('inventory'))
+    errors = ','.join([value[0] for value in form.errors.values()])
+    return jsonify({'errors': errors})
+
+
+@app.route('/inventory/remove-item', methods=['POST'])
+@login_required
+def remove_inventory():
+    """Render the index page."""
+    args = request.get_json()
+    if 'id' not in args:
+        return jsonify({'success': False, 'error': 'ID not found in request!'})
+    c = mongo.db[app.config['INVENTORY_COLLECTION']]
+    remove_id = paranoid_clean(args.get('id'))
+    c.remove({'_id': ObjectId(remove_id)})
+    return jsonify({'success': True})
+
+
+@app.route('/settings')
+@login_required
+def settings():
+    """Render the settings page."""
+    return render_template('settings.html')
+
+
+@app.route('/history')
+@login_required
+def history():
+    """Render the history page."""
+    return render_template('history.html')
+
+
+@app.route('/roast')
+@login_required
+def active_roast():
+    """Render the roast page."""
+    c = mongo.db[app.config['INVENTORY_COLLECTION']]
+    items = c.find({'user': current_user.get_id()})
+    output = list()
+    for x in items:
+        x['id'] = str(x['_id'])
+        output.append(x)
+    output.sort(key=lambda x: x['datetime'], reverse=True)
+    return render_template('roast.html', inventory=output)
+
+
+"""Websocket routes to perform management of the roast."""
 
 
 @sio.on('connect')
@@ -115,7 +281,8 @@ def on_solenoid(state):
     state = to_bool(state)
     ht.set_solenoid(state)
     text = "Turn On" if not state else "Turn Off"
-    sio.emit('activity', {'activity': 'SOLENOID', 'state': state, 'text': text})
+    activity = {'activity': 'SOLENOID', 'state': state, 'text': text}
+    sio.emit('activity', activity)
 
 
 @sio.on('main-fan')
@@ -124,7 +291,8 @@ def on_fan(state):
     state = int(state)
     ht.set_main_fan(state)
     text = "Fan Level %d" % state
-    sio.emit('activity', {'activity': 'MAIN_FAN', 'state': state, 'text': text})
+    activity = {'activity': 'MAIN_FAN', 'state': state, 'text': text}
+    sio.emit('activity', activity)
 
 
 @sio.on('heater')
@@ -133,7 +301,8 @@ def on_heater(state):
     state = int(state)
     ht.set_heater(state)
     text = "Heater Level %d" % state
-    sio.emit('activity', {'activity': 'HEATER', 'state': state, 'text': text})
+    activity = {'activity': 'HEATER', 'state': state, 'text': text}
+    sio.emit('activity', activity)
 
 if __name__ == '__main__':
     sio.run(app, host="0.0.0.0", port=80)
