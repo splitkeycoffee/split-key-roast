@@ -99,20 +99,23 @@ $(document).ready(function () {
                 linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
                 stops: [
                     [0, '#ffffff'],
-                    [.190, '#ffffff'],
+                    [.194, '#ffffff'],
                     [.195, '#efe8e0'],
-                    [.395, '#efe8e0'],
-                    [.400, '#fef1da'],
-                    [.575, '#fef1da'],
-                    [.600, '#d9ebd9'],
-                    [.800, '#d9ebd9'],
+                    [.409, '#efe8e0'],
+                    [.410, '#fef1da'],
+                    [.614, '#fef1da'],
+                    [.615, '#d9ebd9'],
+                    [.825, '#d9ebd9'],
                     [.100, '#ffffff']
                 ]
             },
         },
+        title: {
+            text: 'swdwd'
+        },
         xAxis: {
             title: {
-                text: 'Minutes'
+                text: ''
             },
             max: 11,
             min: 0,
@@ -156,13 +159,16 @@ $(document).ready(function () {
         xAxis: {
             max: 11,
             min: 0,
+            title: {
+                text: 'Minutes'
+            }
         },
         yAxis: {
             max: 100,
             gridLineColor: '#e5e5e5',
             title: {
-                text: ''
-            },
+                text: 'Power'
+            }
         },
         exporting:{
             chartOptions:{
@@ -177,12 +183,12 @@ $(document).ready(function () {
         series: [{
             name: 'Fan',
             type: 'spline',
-            dashStyle: 'dash',
+            // dashStyle: 'dash',
             data: [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 10], [6, 40], [7, 75], [8, 75], [9, 100]]
         }, {
             name: 'Heat',
             type: 'spline',
-            dashStyle: 'dash',
+            // dashStyle: 'dash',
             data: [[0, 100], [1, 0], [2, 80], [3, 90], [4, 100], [5, 100], [6, 100], [7, 100], [8, 100], [9, 100]]
         }]
     });

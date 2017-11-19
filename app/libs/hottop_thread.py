@@ -69,14 +69,14 @@ class MockProcess(Thread):
 
     def run(self):
         import random
-        self._config['environment_temp'] = 400
+        self._config['environment_temp'] = 450
         while not self._q.empty():
             self._config = self._q.get()
 
         while not self.exit.is_set():
             self._log.debug("Thread pulse")
             self._config['environment_temp'] -= random.uniform(0, 1)
-            self._config['bean_temp'] += random.uniform(0, 1)
+            self._config['bean_temp'] = 200
             self._cb({'config': self._config})
             time.sleep(.5)
 
@@ -223,7 +223,10 @@ class ControlProcess(Thread):
 
 class Hottop:
 
-    """Object to interact and control the hottop roaster."""
+    """Object to interact and control the hottop roaster.
+
+    :returns: Hottop instance
+    """
 
     NAME = "HOTTOP"
     USB_PORT = "/dev/cu.usbserial-DA01PEYC"
@@ -248,7 +251,10 @@ class Hottop:
         self._init_controls()
 
     def _logger(self):
-        """Build a logger to use inside of the class."""
+        """Create a logger to be used between processes.
+
+        :returns: Logging instance.
+        """
         logger = logging.getLogger(self.NAME)
         logger.setLevel(self.LOG_LEVEL)
         shandler = logging.StreamHandler(sys.stdout)
@@ -259,7 +265,13 @@ class Hottop:
         return logger
 
     def _autodiscover_usb(self):
-        """Try and find the serial adapter for the hottop."""
+        """Attempt to find the serial adapter for the hottop.
+
+        This will loop over the USB serial interfaces looking for a connection
+        that appears to match the naming convention of the Hottop roaster.
+
+        :returns: string
+        """
         if sys.platform.startswith('win'):
             ports = ['COM%s' % (i + 1) for i in range(256)]
         elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
@@ -284,13 +296,22 @@ class Hottop:
         return match
 
     def connect(self):
-        """Connect to the USB for the hottop."""
+        """Connect to the USB for the hottop.
+
+        Attempt to discover the USB port used for the Hottop and then form a
+        connection using the serial library.
+
+        :returns: bool
+        :raises SerialConnectionError:
+        """
         match = self._autodiscover_usb()
         self._log.debug("Auto-discovered USB port: %s" % match)
         try:
             self._conn = serial.Serial(self.USB_PORT, baudrate=self.BAUDRATE,
-                                       bytesize=self.BYTE_SIZE, parity=self.PARITY,
-                                       stopbits=self.STOPBITS, timeout=self.TIMEOUT)
+                                       bytesize=self.BYTE_SIZE,
+                                       parity=self.PARITY,
+                                       stopbits=self.STOPBITS,
+                                       timeout=self.TIMEOUT)
         except serial.serialutil.SerialException as e:
             raise SerialConnectionError(str(e))
 
@@ -301,7 +322,10 @@ class Hottop:
         return True
 
     def _init_controls(self):
-        """Establish a set of base controls the user can influence."""
+        """Establish a set of base controls the user can influence.
+
+        :returns: None
+        """
         self._config['heater'] = 0
         self._config['fan'] = 0
         self._config['main_fan'] = 0
@@ -309,16 +333,36 @@ class Hottop:
         self._config['solenoid'] = 0
         self._config['cooling_motor'] = 0
         self._config['interval'] = self.INTERVAL
-        self._config['environment_temp'] = 0
+        self._config['external_temp'] = 0
         self._config['bean_temp'] = 0
         self._config['chaff_tray'] = 1
+        self._config['roast'] = dict()
+        self._config['roast']['name'] = None
+        self._config['roast']['input_weight'] = -1
+        self._config['roast']['output_weight'] = -1
+        self._config['roast']['operator'] = None
+        self._config['roast']['start_time'] = None
+        self._config['roast']['end_time'] = None
+        self._config['roast']['duration'] = -1
+        self._config['roast']['notes'] = None
 
     def _callback(self, data):
-        """Processor callback to clean-up stream data."""
+        """Processor callback to clean-up stream data.
+
+        This function provides a hook into the output stream of data from the
+        controller processing thread. Hottop readings are saved into a local
+        class variable for later saving. If the user has defined a callback, it
+        will be called within this private function.
+
+        :param data: Information from the controller process
+        :type data: dict
+        :returns: None
+        """
         if not self._roast_start:
             return
         td = (now_time() - self._roast_start)
-        data['time'] = (td.total_seconds() + 60) / 60
+        data['time'] = (td.total_seconds() + 60) / 60  # Seconds since starting
+        self._config['roast']['duration'] = data['time']
         self._log.debug(data)
         self._roast.append(data)
         if self._user_callback:
@@ -326,82 +370,182 @@ class Hottop:
             self._user_callback(data)
 
     def start(self, func=None):
-        """Start the roaster process."""
+        """Start the roaster control process.
+
+        This function will kick off the processing thread for the Hottop and
+        register any user-defined callback function.
+
+        :param func: Callback function for Hottop stream data
+        :type func: function
+        :returns: None
+        """
         self._user_callback = func
         # self._process = ControlProcess(self._conn, self._config, self._q,
         #                                self._log, callback=self._callback)
         self._process = MockProcess(self._config, self._q, self._log,
                                     callback=self._callback)
         self._roast_start = now_time()
-        self._log.debug(self._roast_start)
+        self._config['roast']['start_time'] = self._roast_start
         self._process.start()
         self._roasting = True
 
     def end(self):
-        """End the roaster process."""
+        """End the roaster control process via thread signal.
+
+        :returns: None
+        """
         self._process.shutdown()
         self._roasting = False
         self._roast_end = now_time()
+        self._config['roast']['end_time'] = self._roast_end
 
     def drop(self):
-        """Preset call to drop coffee from the roaster."""
+        """Preset call to drop coffee from the roaster via thread signal.
+
+        :returns: None
+        """
         self._process.drop()
 
-    def get_state(self):
-        """Return the state of the connection."""
+    def reset(self):
+        """Reset the internal roast properties.
+
+        :returns: None
+        """
+        self._init_controls()
+        self._roasting = False
+        self._roast_start = None
+        self._roast_end = None
+        self._roast = list()
+
+    def get_roast(self):
+        """Get the roast information.
+
+        :returns: list
+        """
+        return self._roast
+
+    def get_serial_state(self):
+        """Get the state of the USB connection.
+
+        :returns: dict
+        """
         if not self._conn:
             return False
         return self._conn.isOpen()
 
     def get_current_config(self):
-        """Get the current running config and state."""
+        """Get the current running config and state.
+
+        :returns: dict
+        """
         return {
-            'state': self.get_state(),
+            'state': self.get_serial_state(),
             'settings': dict(self._config)
         }
 
     def set_interval(self, interval):
-        """Set the polling interval for the process thread."""
+        """Set the polling interval for the process thread.
+
+        :param interval: How often to poll the Hottop
+        :type interval: int or float
+        :returns: None
+        :raises: InvalidInput
+        """
         if type(interval) != float or type(interval) != int:
             raise InvalidInput("Interval value must be of float or int")
         self._config['interval']
 
+    def set_roast_properties(self, settings):
+        """Set the properties of the roast.
+
+        :param settings: General settings for the roast setup
+        :type settings: dict
+        :returns: None
+        :raises: InvalidInput
+        """
+        if type(settings) != dict:
+            raise InvalidInput("Properties value must be of dict")
+        valid = ['name', 'input_weight', 'output_weight', 'operator', 'notes']
+        for key, value in settings.iteritems():
+            if key not in valid:
+                continue
+            self._config['roast'][key] = value
+
     def get_heater(self):
-        """Get the heater config."""
+        """Get the heater config.
+
+        :returns: int [0-100]
+        """
         return self._config['heater']
 
     def set_heater(self, heater):
-        """Set the heater config."""
+        """Set the heater config.
+
+        :param heater: Value to set the heater
+        :type heater: int [0-100]
+        :returns: None
+        :raises: InvalidInput
+        """
         if type(heater) != int and heater not in range(0, 101):
             raise InvalidInput("Heater value must be int between 0-100")
         self._config['heater'] = heater
+        self._q.put(self._config)
 
     def get_fan(self):
-        """Get the fan config."""
+        """Get the fan config.
+
+        :returns: int [0-10]
+        """
         return self._config['fan']
 
     def set_fan(self, fan):
-        """Set the fan config."""
+        """Set the fan config.
+
+        :param fan: Value to set the fan
+        :type fan: int [0-10]
+        :returns: None
+        :raises: InvalidInput
+        """
         if type(fan) != int and fan not in range(0, 11):
             raise InvalidInput("Fan value must be int between 0-10")
         self._config['fan'] = fan
+        self._q.put(self._config)
 
     def get_main_fan(self):
-        """Get the main fan config."""
+        """Get the main fan config.
+
+        :returns: None
+        """
         return self._config['main_fan']
 
     def set_main_fan(self, main_fan):
-        """Set the main fan config."""
+        """Set the main fan config.
+
+        :param main_fan: Value to set the main fan
+        :type main_fan: int [0-10]
+        :returns: None
+        :raises: InvalidInput
+        """
         if type(main_fan) != int and main_fan not in range(0, 11):
             raise InvalidInput("Main fan value must be int between 0-10")
         self._config['main_fan'] = main_fan
+        self._q.put(self._config)
 
     def get_drum_motor(self):
-        """Get the drum motor config."""
+        """Get the drum motor config.
+
+        :returns: None
+        """
         return self._config['drum_motor']
 
     def set_drum_motor(self, drum_motor):
-        """Set the drum motor config."""
+        """Set the drum motor config.
+
+        :param drum_motor: Value to set the drum motor
+        :type drum_motor: bool
+        :returns: None
+        :raises: InvalidInput
+        """
         if type(drum_motor) != bool:
             raise InvalidInput("Drum motor value must be bool")
         self._config['drum_motor'] = bool2int(drum_motor)
@@ -409,21 +553,41 @@ class Hottop:
         self._q.put(self._config)
 
     def get_solenoid(self):
-        """Get the solenoid config."""
+        """Get the solenoid config.
+
+        :returns: None
+        """
         return self._config['solenoid']
 
     def set_solenoid(self, solenoid):
-        """Set the solenoid config."""
+        """Set the solenoid config.
+
+        :param solenoid: Value to set the solenoid
+        :type solenoid: bool
+        :returns: None
+        :raises: InvalidInput
+        """
         if type(solenoid) != bool:
             raise InvalidInput("Solenoid value must be bool")
         self._config['solenoid'] = bool2int(solenoid)
+        self._q.put(self._config)
 
     def get_cooling_motor(self):
-        """Get the cooling motor config."""
+        """Get the cooling motor config.
+
+        :returns: None
+        """
         return self._config['cooling_motor']
 
     def set_cooling_motor(self, cooling_motor):
-        """Set the cooling motor config."""
+        """Set the cooling motor config.
+
+        :param cooling_motor: Value to set the cooling motor
+        :type cooling_motor: bool
+        :returns: None
+        :raises: InvalidInput
+        """
         if type(cooling_motor) != bool:
             raise InvalidInput("Cooling motor value must be bool")
         self._config['cooling_motor'] = bool2int(cooling_motor)
+        self._q.put(self._config)

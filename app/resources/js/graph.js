@@ -99,20 +99,23 @@ $(document).ready(function () {
                 linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
                 stops: [
                     [0, '#ffffff'],
-                    [.190, '#ffffff'],
-                    [.195, '#efe8e0'],
-                    [.395, '#efe8e0'],
-                    [.400, '#fef1da'],
-                    [.575, '#fef1da'],
-                    [.600, '#d9ebd9'],
-                    [.800, '#d9ebd9'],
+                    [.150, '#ffffff'],
+                    [.151, '#efe8e0'],
+                    [.304, '#efe8e0'],
+                    [.305, '#fef1da'],
+                    [.509, '#fef1da'],
+                    [.510, '#d9ebd9'],
+                    [.730, '#d9ebd9'],
                     [.100, '#ffffff']
                 ]
             },
         },
+        title: {
+            text: 'ddw'
+        },
         xAxis: {
             title: {
-                text: 'Minutes'
+                text: ''
             },
             max: 15,
             min: 1,
@@ -123,6 +126,7 @@ $(document).ready(function () {
             title: {
                 text: 'Temperature'
             },
+            min: 0,
             max: 550,
             gridLineColor: '#e5e5e5',
         },
@@ -156,6 +160,9 @@ $(document).ready(function () {
         xAxis: {
             max: 15,
             min: 1,
+            title: {
+                'text': 'Minutes'
+            }
         },
         yAxis: {
             max: 110,
