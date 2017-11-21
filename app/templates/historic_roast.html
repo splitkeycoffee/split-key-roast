@@ -1,8 +1,8 @@
 {% extends "layout/base.html" %}
-{% block title %}Active Roast{% endblock %}
+{% block title %}Historic Roast{% endblock %}
 {% block head %}
     {{ super() }}
-    <link href="resources/css/roast.css" rel="stylesheet">
+    <link href="/resources/css/roast.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
   <div class="row">
@@ -73,120 +73,80 @@
     <nav class="col-sm-4 col-md-2 d-none d-sm-block bg-light sidebar">
 
       <div id="roast-profile" class="">
-        <h4 class="sidebar-header">Roast</h4>
-        <button class="btn btn-sm btn-primary toggle-control" type="button" data-toggle="modal" data-target="#roastPropertiesModal">Properties</button>
-      </div>
+        <h4>Coffee</h4>
+        <p>{{roast.get('coffee')}}</p>
+        <h4>Operator</h4>
+        <p>{{roast.get('operator')}}</p>
+        <h4>Date</h4>
+        <p>{{roast.get('date')}}</p>
+        <h4>Duration</h4>
+        <p>{{roast.get('duration')}}</p>
+        <h4>Input</h4>
+        <p>{{roast.get('input_weight')}}</p>
+        <h4>Output</h4>
+        <p>{{roast.get('output_weight')}}</p>
 
-      <div id="roast-controls">
-        <h4 class="sidebar-header">Controls  <i id="status" class="fa fa-circle disconnected" aria-hidden="true"></i></h4>
-        <button class="btn btn-sm btn-secondary toggle-control margin-bottom-10 mock" type="button" action="true">Mock</button><br>
-        <button class="btn btn-sm btn-success toggle-control margin-bottom-10 setup" type="button" action="true">Start</button><br>
-        <button class="btn btn-sm btn-warning toggle-control margin-bottom-10 shutdown" type="button" action="true">Shutdown</button><br>
-
-        <h5 class="sidebar-header">Fan</h5>
-        <div id="fan-slider" class="slider">
-          <div id="fan-handle" class="ui-slider-handle"></div>
-        </div>
-
-        <h5 class="sidebar-header">Heat</h5>
-        <div id="heat-slider" class="slider">
-          <div id="heat-handle" class="ui-slider-handle"></div>
-        </div>
-
-        <br>
-        <button class="btn btn-sm btn-danger toggle-control margin-bottom-10 reset" type="button" action="true">Reset</button><br>
-
-<!--         <h5 class="sidebar-header">Drum Motor</h5>
-        <button id="drum-motor-btn" class="btn btn-sm toggle-control sec-control" type="button" action=""></button>
-
-        <h5 class="sidebar-header">Stirring Motor</h5>
-        <button id="cooling-motor-btn" class="btn btn-sm toggle-control sec-control" type="button" action=""></button>
-
-        <h5 class="sidebar-header">Drum Hatch</h5>
-        <button id="solenoid-btn" class="btn btn-sm toggle-control sec-control margin-bottom-10" type="button" action=""></button> -->
+        <button class="btn btn-sm btn-warning toggle-control margin-bottom-10" type="button" data-toggle="modal" data-target="#roastPropertiesModal">Edit</button>
+        <button class="btn btn-sm btn-info toggle-control" type="button" data-toggle="modal" data-target="#roastPropertiesModal">Save as Profile</button>
       </div>
 
       <div id="roast-export">
         <h4 class="sidebar-header">Export</h4>
         <button id="export-png" class="btn btn-sm btn-primary toggle-control margin-bottom-10">Graph</button>
+        <a href="/export?id={{roast.get('id')}}"><button id="export-log" class="btn btn-sm btn-primary toggle-control margin-bottom-10">Log</button></a>
       </div>
     </nav>
 
     <main role="main" class="col-sm-9 ml-sm-auto col-md-10 pt-3">
-      <div class="row">
-        <div class="col-md-5">
-          <table class="table table-sm table-bordered">
-            <thead>
-              <tr>
-                <th scope="col" class="tbl-label etemp">Environment Temperature</th>
-                <th scope="col" class="tbl-label btemp">Bean Temperature</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><span id="environment-temp" class='reading etemp'>-1</span></td>
-                <td><span id="bean-temp" class='reading btemp'>-1</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="col-md-7">
-          <table class="table table-sm table-bordered">
-            <thead>
-              <tr>
-                <th scope="col" class="tbl-label">Heater</th>
-                <th scope="col" class="tbl-label">Fan</th>
-                <th scope="col" class="tbl-label">Main Fan</th>
-                <th scope="col" class="tbl-label">Solenoid</th>
-                <th scope="col" class="tbl-label">Drum Motor</th>
-                <th scope="col" class="tbl-label">Cooling Motor</th>
-                <th scope="col" class="tbl-label">Chaff Tray</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><span id="heater" class='reading'>-1</span></td>
-                <td><span id="fan" class='reading'>-1</span></td>
-                <td><span id="main-fan" class='reading'>-1</span></td>
-                <td><span id="solenoid" class='reading'>-1</span></td>
-                <td><span id="drum-motor" class='reading'>-1</span></td>
-                <td><span id="cooling-motor" class='reading'>-1</span></td>
-                <td><span id="chaff-tray" class='reading'>-1</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <hr/>
       <div id="container" class="graph"></div>
       <div id="auxiliary" class="graph"></div>
+      <div class="container">
+        <h4>Notes</h4>
+        {% if roast.get('notes')|count > 0 %}
+        <p>{{roast.get('notes')}}</p>
+        {% else %}
+        <p>No notes saved.</p>
+        {% endif %}
+      </div>
     </main>
   </div>
 {% endblock %}
 {% block bottom_import %}
     {{ super() }}
     <script type="text/javascript">
-    $("#fan-slider").slider({
-      range: "min", value: 0, min: 0, max: 10,
-      create: function() {
-        $('#fan-handle').text($(this).slider("value"));
-      }
-    });
-    $("#heat-slider").slider({
-      range: "min", value: 0, min: 0, max: 100,
-      create: function() {
-        $('#heat-handle').text($(this).slider("value"));
-      }
-    });
+      $('#roast-controls').show().css('visibility', 'visible');
+      $('#roast-export').show().css('visibility', 'visible');
     </script>
-    <script src="resources/external/highcharts/highcharts.js"></script>
+    <script src="/resources/external/highcharts/highcharts.js"></script>
     <script src="http://code.highcharts.com/modules/exporting.js"></script>
     <script src="https://code.highcharts.com/modules/offline-exporting.js"></script>
 
-    <script src="resources/js/graph.js"></script>
-    <script src="resources/js/hottop.js"></script>
+    <script src="/resources/js/graph.js"></script>
 
     <script type="text/javascript">
+    $(document).ready(function () {
+      mainChart.series[0].setData({{derived['s1']}});
+      mainChart.series[1].setData({{derived['s2']}});
+      auxChart.series[0].setData({{derived['s3']}});
+      auxChart.series[1].setData({{derived['s4']}});
+
+      $('#operator').val("{{roast.get('operator')}}");
+      $('#input-weight').val("{{roast.get('input_weight')}}");
+      $('#output-weight').val("{{roast.get('output_weight')}}");
+      $('#roast-notes').val("{{roast.get('notes')}}");
+
+      var properties = {name: $('#graph-title').val(),
+                        operator: $('#operator').val(),
+                        input_weight: $('#input-weight').val(),
+                        output_weight: $('#output-weight').val(),
+                        coffee: $('#graph-title').val(),
+                        notes: $('#roast-notes').val()}
+
+      var subtitle = `{{roast.get('date')}}, ${properties.operator}, input: ${properties.input_weight}, output: ${properties.output_weight}`;
+      mainChart.setTitle({text: "{{roast.get('name')}}"},
+                         {text: subtitle});
+    });
+
     $('#inventory').change(function() {
       var selection = $(this).val();
       var title = $('option:selected', this).attr('origin') + " - " + selection;
@@ -218,15 +178,9 @@
       mainChart.setTitle({text: $('#graph-title').val()}, {text: subtitle});
       socket.emit('roast-properties', properties);
       $('#roastPropertiesModal').modal('hide');
-      $('#roast-controls').show().css('visibility', 'visible');
-      $('#roast-export').show().css('visibility', 'visible');
       $(window).bind("beforeunload",function(event) {
           return false;
       });
     });
-
-    $('.reset').click(function() {
-      location.reload();
-    })
     </script>
 {% endblock %}

@@ -111,7 +111,7 @@ $(document).ready(function () {
             },
         },
         title: {
-            text: 'ddw'
+            text: ''
         },
         xAxis: {
             title: {

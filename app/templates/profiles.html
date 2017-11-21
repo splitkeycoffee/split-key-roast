@@ -1,0 +1,49 @@
+{% extends "layout/base.html" %}
+{% block title %}Roast{% endblock %}
+{% block head %}
+    {{ super() }}
+    <link href="resources/css/history.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+  <div class="row">
+    <main role="main" class="col-md-12 pt-3">
+      <h1>Profiles <span class="pull-right"><a href="/roast"><button class="btn btn-primary" type="button">New Roast</button></a></h1>
+      <div class="table-responsive">
+        {% if profiles|count > 0 %}
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Roast</th>
+              <th>Quantity</th>
+              <th>Duration</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for item in profiles %}
+            <tr>
+              <td>{{item.get('')}}</td>
+              <td>{{item.get('')}}</td>
+              <td>{{item.get('')}}</td>
+              <td>{{item.get('')}}</td>
+              <td></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="card text-white bg-secondary">
+          <div class="card-body history-card">
+            <h4 class="card-title">Get to Roasting</h4>
+            <p class="card-text">Once you start roasting some coffee, we will show you your history. You'll be able to view past roasts in complete detail along with profile graphs and <statistics class=""></statistics></p>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </main>
+  </div>
+{% endblock %}
+{% block bottom_import %}
+    {{ super() }}
+{% endblock %}

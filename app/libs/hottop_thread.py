@@ -1,9 +1,9 @@
 """
 Interface with the hottop roaster through the serial port.
-
 """
 
 import binascii
+import copy
 import datetime
 import glob
 import logging
@@ -42,9 +42,23 @@ def celsius2fahrenheit(c):
     return (c * 1.8) + 32
 
 
-def now_time():
+def now_time(str=False):
     """Get the current time."""
+    if str:
+        return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return datetime.datetime.now()
+
+
+def now_date(str=False):
+    """Get the current date."""
+    if str:
+        return datetime.datetime.now().strftime("%Y-%m-%d")
+    return datetime.date.today()
+
+
+def load_time(str_time):
+    """Convert the date string to a real datetime."""
+    return datetime.datetime.strptime(str_time, "%Y-%m-%d %H:%M:%S")
 
 
 def timedelta2millisecond(td):
@@ -53,6 +67,14 @@ def timedelta2millisecond(td):
     milliseconds += td.seconds * 1000
     milliseconds += td.microseconds / 1000
     return milliseconds
+
+
+def timedelta2period(duration):
+    """Convert timedelta to different formats."""
+    seconds = duration.seconds
+    minutes = (seconds % 3600) // 60
+    seconds = (seconds % 60)
+    return '{0:0>2}:{1:0>2}'.format(minutes, seconds)
 
 
 class MockProcess(Thread):
@@ -77,7 +99,7 @@ class MockProcess(Thread):
             self._log.debug("Thread pulse")
             self._config['environment_temp'] -= random.uniform(0, 1)
             self._config['bean_temp'] = 200
-            self._cb({'config': self._config})
+            self._cb(self._config)  # This gives us a way to know when to read
             time.sleep(.5)
 
     def shutdown(self):
@@ -242,7 +264,7 @@ class Hottop:
         """Start of the hottop."""
         self._log = self._logger()
         self._conn = None
-        self._roast = list()
+        self._roast = dict()
         self._roasting = False
         self._roast_start = None
         self._roast_end = None
@@ -336,15 +358,16 @@ class Hottop:
         self._config['external_temp'] = 0
         self._config['bean_temp'] = 0
         self._config['chaff_tray'] = 1
-        self._config['roast'] = dict()
-        self._config['roast']['name'] = None
-        self._config['roast']['input_weight'] = -1
-        self._config['roast']['output_weight'] = -1
-        self._config['roast']['operator'] = None
-        self._config['roast']['start_time'] = None
-        self._config['roast']['end_time'] = None
-        self._config['roast']['duration'] = -1
-        self._config['roast']['notes'] = None
+
+        self._roast['name'] = None
+        self._roast['input_weight'] = -1
+        self._roast['output_weight'] = -1
+        self._roast['operator'] = None
+        self._roast['start_time'] = None
+        self._roast['end_time'] = None
+        self._roast['duration'] = -1
+        self._roast['notes'] = None
+        self._roast['events'] = list()
 
     def _callback(self, data):
         """Processor callback to clean-up stream data.
@@ -360,14 +383,19 @@ class Hottop:
         """
         if not self._roast_start:
             return
-        td = (now_time() - self._roast_start)
-        data['time'] = (td.total_seconds() + 60) / 60  # Seconds since starting
-        self._config['roast']['duration'] = data['time']
-        self._log.debug(data)
-        self._roast.append(data)
+        local = copy.deepcopy(data)
+        output = dict()
+        output['config'] = local
+        td = (now_time() - load_time(self._roast_start))
+        output['time'] = (td.total_seconds() + 60) / 60  # Seconds since starting
+        self._roast['duration'] = output['time']
+        self._roast['events'].append(copy.deepcopy(output))
+
         if self._user_callback:
             self._log.debug("Passing data back to client handler")
-            self._user_callback(data)
+            output['roast'] = self._roast
+            output['roasting'] = self._roasting
+            self._user_callback(output)
 
     def start(self, func=None):
         """Start the roaster control process.
@@ -384,8 +412,8 @@ class Hottop:
         #                                self._log, callback=self._callback)
         self._process = MockProcess(self._config, self._q, self._log,
                                     callback=self._callback)
-        self._roast_start = now_time()
-        self._config['roast']['start_time'] = self._roast_start
+        self._roast_start = now_time(str=True)
+        self._roast['start_time'] = self._roast_start
         self._process.start()
         self._roasting = True
 
@@ -396,8 +424,12 @@ class Hottop:
         """
         self._process.shutdown()
         self._roasting = False
-        self._roast_end = now_time()
-        self._config['roast']['end_time'] = self._roast_end
+        self._roast_end = now_time(str=True)
+        self._roast['end_time'] = self._roast_end
+        self._roast['date'] = now_date(str=True)
+        et = load_time(self._roast['end_time'])
+        st = load_time(self._roast['start_time'])
+        self._roast['duration'] = timedelta2period(et - st)
 
     def drop(self):
         """Preset call to drop coffee from the roaster via thread signal.
@@ -411,11 +443,11 @@ class Hottop:
 
         :returns: None
         """
-        self._init_controls()
         self._roasting = False
         self._roast_start = None
         self._roast_end = None
-        self._roast = list()
+        self._roast = dict()
+        self._init_controls()
 
     def get_roast(self):
         """Get the roast information.
@@ -455,6 +487,13 @@ class Hottop:
             raise InvalidInput("Interval value must be of float or int")
         self._config['interval']
 
+    def get_roast_properties(self):
+        """Get the roast properties.
+
+        :returns: dict
+        """
+        return self._roast
+
     def set_roast_properties(self, settings):
         """Set the properties of the roast.
 
@@ -465,11 +504,12 @@ class Hottop:
         """
         if type(settings) != dict:
             raise InvalidInput("Properties value must be of dict")
-        valid = ['name', 'input_weight', 'output_weight', 'operator', 'notes']
+        valid = ['name', 'input_weight', 'output_weight', 'operator', 'notes',
+                 'coffee']
         for key, value in settings.iteritems():
             if key not in valid:
                 continue
-            self._config['roast'][key] = value
+            self._roast[key] = value
 
     def get_heater(self):
         """Get the heater config.

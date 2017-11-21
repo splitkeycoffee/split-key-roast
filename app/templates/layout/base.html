@@ -11,18 +11,18 @@
     <title>{% block title %}{% endblock %} - Cloud Cafe</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="resources/external/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/resources/external/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="resources/external/bootstrap/assets/css/sticky-footer-navbar.css" rel="stylesheet">
-    <link rel="stylesheet" href="resources/external/font-awesome/css/font-awesome.min.css" type="text/css">
-    <link rel="stylesheet" href="resources/external/jquery-ui/jquery-ui.min.css" type="text/css">
-    <link href="resources/css/dashboard.css" rel="stylesheet">
+    <link href="/resources/external/bootstrap/assets/css/sticky-footer-navbar.css" rel="stylesheet">
+    <link rel="stylesheet" href="/resources/external/font-awesome/css/font-awesome.min.css" type="text/css">
+    <link rel="stylesheet" href="/resources/external/jquery-ui/jquery-ui.min.css" type="text/css">
+    <link href="/resources/css/dashboard.css" rel="stylesheet">
 
     <!-- JS -->
-    <script type="text/javascript" src="resources/external/socket.io.min.js"></script>
-    <script src="resources/external/jquery.min.js"></script>
-    <script src="resources/external/jquery-ui/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/resources/external/socket.io.min.js"></script>
+    <script src="/resources/external/jquery.min.js"></script>
+    <script src="/resources/external/jquery-ui/jquery-ui.min.js"></script>
     {% endblock %}
   </head>
   <!-- END: Head -->
@@ -48,15 +48,25 @@
               <a class="nav-link" href="/history">History</a>
             </li>
             <li class="nav-item active">
-              <a class="nav-link" href="/inventory">Inventory</span></a>
+              <a class="nav-link" href="/profiles">Profiles</a>
             </li>
             <li class="nav-item active">
-              <a class="nav-link" href="/settings">Settings</span></a>
+              <a class="nav-link" href="/inventory">Inventory</span></a>
             </li>
+
           </ul>
           <div class="mt-2 mt-md-0">
             {% if current_user.is_authenticated %}
-              <a href="/logout" class="logout"><button class="btn btn-sm btn-secondary" type="button">Logout</button></a>
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item dropdown">
+                <a href="" class="logout" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><button class="btn btn-sm btn-secondary dropdown-toggle" type="button">Account</button></a>
+                <div class="dropdown-menu  dropdown-menu-right" aria-labelledby="dropdown01">
+                  <a class="dropdown-item" href="/settings">Settings</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="/logout">Logout</a>
+                </div>
+              </li>
+            </ul>
             {% endif %}
           </div>
         </div>
@@ -84,8 +94,8 @@
 
     <!-- START: Bottom Imports -->
     {% block bottom_import %}
-    <script src="resources/external/bootstrap/assets/js/vendor/popper.min.js"></script>
-    <script src="resources/external/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/resources/external/bootstrap/assets/js/vendor/popper.min.js"></script>
+    <script src="/resources/external/bootstrap/js/bootstrap.min.js"></script>
     {% endblock %}
     <!-- END: Bottom Imports -->
 

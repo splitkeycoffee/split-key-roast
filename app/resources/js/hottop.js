@@ -1,3 +1,4 @@
+socket = null;
 debug = true;
 
 function initToggleControl(id, state) {
@@ -67,6 +68,17 @@ $(document).ready(function() {
     });
 
     socket.on('state', function(data) {
+        console.log(data);
+        if (data.roasting) {
+            $('.mock').prop("disabled", true);
+            $('.setup').prop("disabled", true);
+            $('.shutdown').prop("disabled", false);
+        } else {
+            $('.shutdown').prop("disabled", true);
+            $('.mock').prop("disabled", false);
+            $('.setup').prop("disabled", false);
+        }
+
         for (var key in data.config) {
             var id = "#" + key.replace('_', '-');
             if (key === 'environment_temp' || key === 'bean_temp') {
@@ -93,6 +105,18 @@ $(document).ready(function() {
             toggleControl('#cooling-motor-btn', (!data.state), data.text);
         } else if (data.activity === "SOLENOID") {
             toggleControl('#solenoid-btn', (!data.state), data.text);
+        } else if (data.activity === "ROAST_START") {
+            $('.mock').prop("disabled", true);
+            $('.setup').prop("disabled", true);
+        } else if (data.activity === "ROAST_RESET") {
+            location.reload();
+        } else if (data.activity === "ROAST_SHUTDOWN") {
+            var subtitle = $('#graph-subtitle').val() + ", " + data.state.date;
+            mainChart.setTitle({text: $('#graph-title').val()}, {text: subtitle});
+            $('.mock').prop("disabled", false);
+            $('.setup').prop("disabled", false);
+        } else {
+            console.log(data);
         }
     });
 
@@ -110,7 +134,7 @@ $(document).ready(function() {
         if (debug) { console.log("Shutdown Initiated"); }
         socket.emit('shutdown');
         $.each($('.reading'), function( index, value ) {
-            $(this).html('');
+            $(this).html('-1');
         });
     });
 

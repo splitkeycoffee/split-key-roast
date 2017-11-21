@@ -22,12 +22,14 @@
           </thead>
           <tbody>
           {% for item in history %}
-            <tr>
-              <td>{{item.get('')}}</td>
-              <td>{{item.get('')}}</td>
-              <td>{{item.get('')}}</td>
-              <td>{{item.get('')}}</td>
-              <td></td>
+            <tr id="{{ item.get('id') }}">
+              <td><a href="/roast/{{item.get('id')}}">{{item.get('name')}}</a></td>
+              <td>{{item.get('input_weight')}}</td>
+              <td>{{item.get('duration')}}</td>
+              <td>{{item.get('date')}}</td>
+              <td>
+                <button type="button" class="btn btn-sm btn-danger delete-row">Delete</button>
+              </td>
             </tr>
           {% endfor %}
           </tbody>
@@ -40,9 +42,31 @@
           </div>
         </div>
         {% endif %}
+      </div>
     </main>
   </div>
 {% endblock %}
 {% block bottom_import %}
     {{ super() }}
+    <script type="text/javascript">
+
+      $('.delete-row').click(function(e) {
+        _this = this;
+        $.ajax({
+            url: '/history/remove-item',
+            type: 'post',
+            dataType: 'json',
+            contentType:'application/json',
+            data: JSON.stringify({ id: $(this).closest('tr').attr('id')}),
+            success: function(data) {
+              if (data.success) {
+                $(_this).closest('tr').remove();
+              } else {
+                $('#error-message').text(data.error).show();
+                $('#error-container').show().removeClass('hidden');
+              }
+            }
+        });
+      });
+    </script>
 {% endblock %}
