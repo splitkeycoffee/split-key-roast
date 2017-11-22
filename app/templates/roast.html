@@ -160,6 +160,11 @@
       <hr/>
       <div id="container" class="graph"></div>
       <div id="auxiliary" class="graph"></div>
+      <div class="roast-actions">
+        <button class="btn btn-sm btn-primary margin-10 fc" type="button" action="true">First Crack</button>
+        <button class="btn btn-sm btn-primary margin-10 sc" type="button" action="true">Second Crack</button>
+        <button class="btn btn-sm btn-primary margin-10 drop" type="button" action="true">Drop</button>
+      </div>
     </main>
   </div>
 {% endblock %}
@@ -179,7 +184,8 @@
       }
     });
     </script>
-    <script src="resources/external/highcharts/highcharts.js"></script>
+    <!-- <script src="resources/external/highcharts/highcharts.js"></script> -->
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
     <script src="http://code.highcharts.com/modules/exporting.js"></script>
     <script src="https://code.highcharts.com/modules/offline-exporting.js"></script>
 
@@ -227,6 +233,6 @@
 
     $('.reset').click(function() {
       location.reload();
-    })
+    });
     </script>
 {% endblock %}

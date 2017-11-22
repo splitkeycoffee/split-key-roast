@@ -75,6 +75,9 @@ $(document).ready(function () {
         tooltip: {
             shared: true,
             formatter: function () {
+                if (this.point) {
+                    return '';
+                }
                 return '<b>' + this.points[0].series.name + ':</b> ' + Highcharts.numberFormat(this.points[0].y, -1) + '<br/>' +
                         '<b>' + this.points[1].series.name + ':</b> ' + Highcharts.numberFormat(this.points[1].y, -1) + '<br/>';
             },
@@ -143,11 +146,19 @@ $(document).ready(function () {
         series: [{
             name: 'Environment Temperature',
             color: 'red',
-            data: []
+            data: [],
+            id: 'et'
         }, {
             name: 'Bean Temperature',
             color: '#020c7d',
-            data: []
+            data: [],
+            id: 'bt'
+        }, {
+            type: 'flags',
+            shape: 'squarepin',
+            data: [],
+            onSeries: 'bt',
+            yAxis: 0
         }]
     });
 

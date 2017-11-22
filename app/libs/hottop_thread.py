@@ -368,6 +368,7 @@ class Hottop:
         self._roast['duration'] = -1
         self._roast['notes'] = None
         self._roast['events'] = list()
+        self._roast['last'] = dict()
 
     def _callback(self, data):
         """Processor callback to clean-up stream data.
@@ -390,6 +391,8 @@ class Hottop:
         output['time'] = (td.total_seconds() + 60) / 60  # Seconds since starting
         self._roast['duration'] = output['time']
         self._roast['events'].append(copy.deepcopy(output))
+        local.update({'time': output['time']})
+        self._roast['last'] = local
 
         if self._user_callback:
             self._log.debug("Passing data back to client handler")
@@ -449,12 +452,31 @@ class Hottop:
         self._roast = dict()
         self._init_controls()
 
+    def add_roast_event(self, event):
+        """Add an event to the roast log.
+
+        :param event: Details describing what happened
+        :type event: dict
+        :returns: dict
+        """
+        event.update({'time': self.get_roast_time()})
+        self._roast['events'].append(event)
+        return self.get_roast_properties()
+
     def get_roast(self):
         """Get the roast information.
 
         :returns: list
         """
         return self._roast
+
+    def get_roast_time(self):
+        """Get the roast time.
+
+        :returns: float
+        """
+        td = (now_time() - load_time(self._roast_start))
+        return (td.total_seconds() + 60) / 60
 
     def get_serial_state(self):
         """Get the state of the USB connection.

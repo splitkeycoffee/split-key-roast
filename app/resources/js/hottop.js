@@ -68,7 +68,6 @@ $(document).ready(function() {
     });
 
     socket.on('state', function(data) {
-        console.log(data);
         if (data.roasting) {
             $('.mock').prop("disabled", true);
             $('.setup').prop("disabled", true);
@@ -115,6 +114,24 @@ $(document).ready(function() {
             mainChart.setTitle({text: $('#graph-title').val()}, {text: subtitle});
             $('.mock').prop("disabled", false);
             $('.setup').prop("disabled", false);
+        } else if (data.activity === "FIRST_CRACK") {
+            mainChart.series[2].addPoint({
+                x: data.state.last.time,
+                title: 'First Crack (' + data.state.last.environment_temp.toFixed(0) + ", " + data.state.last.bean_temp.toFixed(0) + ")",
+                text: "First Crack"
+            });
+        } else if (data.activity === "SECOND_CRACK") {
+            mainChart.series[2].addPoint({
+                x: data.state.last.time,
+                title: 'Second Crack (' + data.state.last.environment_temp.toFixed(0) + ", " + data.state.last.bean_temp.toFixed(0) + ")",
+                text: "Second Crack"
+            });
+        } else if (data.activity === "DROP_COFFEE") {
+            mainChart.series[2].addPoint({
+                x: data.state.last.time,
+                title: 'Dropped (' + data.state.last.environment_temp.toFixed(0) + ", " + data.state.last.bean_temp.toFixed(0) + ")",
+                text: "Dropped"
+            });
         } else {
             console.log(data);
         }
@@ -136,6 +153,22 @@ $(document).ready(function() {
         $.each($('.reading'), function( index, value ) {
             $(this).html('-1');
         });
+    });
+
+    $('.fc').click(function() {
+        socket.emit('first-crack');
+        $(this).prop("disabled", true);
+    });
+
+    $('.sc').click(function() {
+        socket.emit('second-crack');
+        $(this).prop("disabled", true);
+    });
+
+    $('.drop').click(function() {
+        if (debug) { console.log("Drop Initiated"); }
+        socket.emit('drop');
+        $(this).prop("disabled", true);
     });
 
     $('.sec-control').click(function(e) {

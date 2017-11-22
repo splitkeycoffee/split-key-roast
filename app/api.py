@@ -343,12 +343,39 @@ def on_shutdown():
     sio.emit('activity', activity)
 
 
+@sio.on('drop')
+def on_drop():
+    """Drop the coffee and begin the cool-down."""
+    ht.drop()
+    state = ht.add_roast_event({'event': 'Drop Coffee'})
+    activity = {'activity': 'DROP_COFFEE', 'state': state}
+    sio.emit('activity', activity)
+
+
 @sio.on('reset')
 def on_reset():
     """Reset the connection with the roaster."""
     ht.reset()
     state = ht.get_roast_properties()
     activity = {'activity': 'ROAST_RESET', 'state': state}
+    sio.emit('activity', activity)
+
+
+@sio.on('first-crack')
+def on_first_crack():
+    """Register the first crack event."""
+    logger.debug("First crack")
+    state = ht.add_roast_event({'event': 'First Crack'})
+    activity = {'activity': 'FIRST_CRACK', 'state': state}
+    sio.emit('activity', activity)
+
+
+@sio.on('second-crack')
+def on_second_crack():
+    """Register the second crack event."""
+    logger.debug("Second crack")
+    state = ht.add_roast_event({'event': 'Second Crack'})
+    activity = {'activity': 'SECOND_CRACK', 'state': state}
     sio.emit('activity', activity)
 
 
