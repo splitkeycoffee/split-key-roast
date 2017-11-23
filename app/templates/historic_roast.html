@@ -16,35 +16,8 @@
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <form id="roast-properties-form">
+          <form id="roast-properties-form" >
             <div class="modal-body">
-                <div class="form-group">
-                  <label class="col-form-label" for="formGroupExampleInput">Coffee</label>
-                  {% if inventory|count > 0 %}
-                  <select id="inventory">
-                    <option value="">Select coffee</option>
-                    {% for item in inventory %}
-                    <option id="{{item.get('id')}}" origin="{{item.get('origin')}}" max-weight="{{item.get('stock')}}" value="{{item.get('label')}}">{{item.get('label')}}</option>
-                    {% endfor %}
-                  </select>
-                  {% else %}
-                    <a href="/inventory" class="logout"><button class="btn btn-sm btn-danger" type="button">Add Inventory</button></a>
-                  {% endif %}
-                </div>
-                <div class="form-group">
-                  <label class="col-form-label" for="formGroupExampleInput">Profile</label>
-                  <select id="history">
-                    <option value="">Select profile</option>
-                    <option value="manual">Manual</option>
-                    {% for item in history %}
-                    <option></option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="col-form-label" for="formGroupExampleInput2">Operator</label>
-                  <input type="text" class="form-control" id="operator" value="{{current_user.get_name()}}" disabled>
-                </div>
                 <div class="form-group">
                   <label class="col-form-label" for="formGroupExampleInput2">Input (grams)</label>
                   <input type="number" class="form-control" id="input-weight" name="input-weight" min="0" max="500" placeholder="225">
@@ -59,7 +32,10 @@
                 </div>
             </div>
             <div class="modal-footer">
-              <input type="hidden" class="form-control" id="roast-id" value="">
+              <input type="hidden" class="form-control" id="coffee" value="{{roast.get('coffee')}}">
+              <input type="hidden" class="form-control" id="date" value="{{roast.get('date')}}">
+              <input type="hidden" class="form-control" id="operator" value="{{current_user.get_name()}}">
+              <input type="hidden" class="form-control" id="roast-id" value="{{roast.get('id')}}">
               <input type="hidden" class="form-control" id="graph-title" value="">
               <input type="hidden" class="form-control" id="graph-subtitle" value="">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -75,19 +51,25 @@
       <div id="roast-profile" class="">
         <h4>Coffee</h4>
         <p>{{roast.get('coffee')}}</p>
-        <h4>Operator</h4>
-        <p>{{roast.get('operator')}}</p>
         <h4>Date</h4>
         <p>{{roast.get('date')}}</p>
         <h4>Duration</h4>
         <p>{{roast.get('duration')}}</p>
         <h4>Input</h4>
-        <p>{{roast.get('input_weight')}}</p>
+        <p id="sidebar-input-weight">{{roast.get('input_weight')}}</p>
         <h4>Output</h4>
-        <p>{{roast.get('output_weight')}}</p>
+        <p id="sidebar-output-weight">{{roast.get('output_weight')}}</p>
+        <h4>Notes</h4>
+        {% if roast.get('notes')|count > 0 %}
+        <p id="sidebar-note">{{roast.get('notes')}}</p>
+        {% else %}
+        <p id="sidebar-note">No notes saved.</p>
+        {% endif %}
+        <hr/>
 
         <button class="btn btn-sm btn-warning toggle-control margin-bottom-10" type="button" data-toggle="modal" data-target="#roastPropertiesModal">Edit</button>
-        <button class="btn btn-sm btn-info toggle-control" type="button" data-toggle="modal" data-target="#roastPropertiesModal">Save as Profile</button>
+        <button class="btn btn-sm btn-info toggle-control margin-bottom-10" type="button">Cup Roast</button>
+        <button class="btn btn-sm btn-info toggle-control" type="button">Save as Profile</button>
       </div>
 
       <div id="roast-export">
@@ -100,13 +82,44 @@
     <main role="main" class="col-sm-9 ml-sm-auto col-md-10 pt-3">
       <div id="container" class="graph"></div>
       <div id="auxiliary" class="graph"></div>
-      <div class="container">
-        <h4>Notes</h4>
-        {% if roast.get('notes')|count > 0 %}
-        <p>{{roast.get('notes')}}</p>
-        {% else %}
-        <p>No notes saved.</p>
-        {% endif %}
+      <div class="cuppings">
+        <h4>Cups</h4>
+        <div class="table-responsive">
+          {% if cuppings|count > 0 %}
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Origin</th>
+                <th>Process</th>
+                <th>Stock</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for item in cuppings %}
+              <tr id="{{ item.get('id') }}">
+                <td>{{item.get('label')}}</td>
+                <td>{{item.get('origin')}}</td>
+                <td>{{item.get('process')}}</td>
+                <td>{{item.get('stock')}}</td>
+                <td>
+                  <button type="button" class="btn btn-sm btn-primary edit-row">Edit</button>
+                  <button type="button" class="btn btn-sm btn-danger delete-row">Delete</button>
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <div class="card text-white bg-secondary">
+            <div class="card-body inventory-card">
+              <h4 class="card-title">Add Sample Results</h4>
+              <p class="card-text">Cupping your roasted beans lets you capture the flavor profile of the roast. Once you add cupping results, they will show up here.</p>
+            </div>
+          </div>
+          {% endif %}
+        </div>
       </div>
     </main>
   </div>
@@ -122,6 +135,7 @@
     <script src="https://code.highcharts.com/modules/offline-exporting.js"></script>
 
     <script src="/resources/js/graph.js"></script>
+    <script src="/resources/js/hottop.js"></script>
 
     <script type="text/javascript">
     $(document).ready(function () {
@@ -166,22 +180,23 @@
       if (!e.target.checkValidity()) {
         return false;
       }
-      var today = new Date();
-      var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-      var properties = {name: $('#graph-title').val(),
+      var date = $('#date').val();
+      var properties = {id: $('#roast-id').val(),
+                        name: $('#graph-title').val(),
                         operator: $('#operator').val(),
                         input_weight: $('#input-weight').val(),
                         output_weight: $('#output-weight').val(),
-                        coffee: $('#graph-title').val(),
+                        coffee: $('#coffee').val(),
                         notes: $('#roast-notes').val()}
       var subtitle = `${date}, ${properties.operator}, input: ${properties.input_weight}, output: ${properties.output_weight}`;
       $('#graph-subtitle').val(subtitle);
       mainChart.setTitle({text: $('#graph-title').val()}, {text: subtitle});
-      socket.emit('roast-properties', properties);
+      socket.emit('update-roast-properties', properties);
       $('#roastPropertiesModal').modal('hide');
-      $(window).bind("beforeunload",function(event) {
-          return false;
-      });
+
+      $('#sidebar-note').html($('#roast-notes').val());
+      $('#sidebar-input-weight').html($('#input-weight').val());
+      $('#sidebar-output-weight').html($('#output-weight').val());
     });
     </script>
 {% endblock %}

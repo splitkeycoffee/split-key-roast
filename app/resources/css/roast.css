@@ -1,3 +1,7 @@
+.cuppings {
+    padding: 10px;
+}
+
 #inventory, #history {
     width: 100%;
 }
