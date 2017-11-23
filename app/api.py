@@ -16,7 +16,10 @@ import logging
 import socketio
 import sys
 
-from forms import LoginForm, RegisterForm, InventoryForm
+from forms import (
+    LoginForm, RegisterForm, InventoryForm, AccountSettingsForm,
+    ChangePasswordForm
+)
 from user import User
 
 from libs.hottop_thread import Hottop
@@ -95,7 +98,6 @@ def login():
             # flash("Logged in successfully", category='success')
             next = request.args.get('next')
             return redirect(next or url_for('root'))
-    logger.debug("Return")
     return render_template('login.html')
 
 
@@ -188,7 +190,49 @@ def remove_inventory():
 @login_required
 def settings():
     """Render the settings page."""
-    return render_template('settings.html')
+    c = mongo.db[app.config['USERS_COLLECTION']]
+    user = c.find_one({'email': current_user.get_id()})
+    if not user:
+        return render_template()
+    user['id'] = str(user['_id'])
+    user.pop('_id', None)
+    return render_template('settings.html', user=user)
+
+
+@app.route('/account/settings/update', methods=['POST'])
+@login_required
+def update_account():
+    """Update account settings."""
+    form = AccountSettingsForm(request.form)
+    if form.validate():
+        if 'user_id' not in request.form:
+            return jsonify({'success': False, 'error': 'ID not found in edit!'})
+        edit_id = paranoid_clean(request.form.get('user_id'))
+        c = mongo.db[app.config['USERS_COLLECTION']]
+        item = {'first_name': form.first_name.data,
+                'last_name': form.last_name.data,
+                'email': form.email.data}
+        c.update({'_id': ObjectId(edit_id)}, {'$set': item})
+        return redirect(url_for('settings'))
+    errors = ','.join([value[0] for value in form.errors.values()])
+    return jsonify({'errors': errors})
+
+
+@app.route('/account/settings/change-password', methods=['POST'])
+@login_required
+def account_change_password():
+    """Update account password."""
+    form = ChangePasswordForm(request.form)
+    if form.validate():
+        if 'user_id' not in request.form:
+            return jsonify({'success': False, 'error': 'ID not found in edit!'})
+        edit_id = paranoid_clean(request.form.get('user_id'))
+        c = mongo.db[app.config['USERS_COLLECTION']]
+        item = {'password': generate_password_hash(form.password.data)}
+        c.update({'_id': ObjectId(edit_id)}, {'$set': item})
+        return redirect(url_for('settings'))
+    errors = ','.join([value[0] for value in form.errors.values()])
+    return jsonify({'errors': errors})
 
 
 @app.route('/history')
