@@ -294,8 +294,15 @@ def historic_roast(roast_id):
         return jsonify({'success': False, 'message': 'No such roast.'})
     item['id'] = str(item['_id'])
 
-    derived = {'s1': list(), 's2': list(), 's3': list(), 's4': list()}
+    derived = {'s1': list(), 's2': list(), 's3': list(), 's4': list(),
+               'flags': list()}
     for p in item['events']:
+        if 'event' in p:
+            label = "%s (%d, %d)" % (p['event'],
+                                     int(p['config']['environment_temp']),
+                                     int(p['config']['bean_temp']))
+            derived['flags'].append({'x': p['time'], 'title': str(label)})
+            continue
         derived['s1'].append([p['time'], p['config']['environment_temp']])
         derived['s2'].append([p['time'], p['config']['bean_temp']])
         derived['s3'].append([p['time'], p['config']['main_fan'] * 10])
@@ -308,7 +315,6 @@ def historic_roast(roast_id):
         x['id'] = str(x['_id'])
         inventory.append(x)
     inventory.sort(key=lambda x: x['datetime'], reverse=True)
-
     return render_template('historic_roast.html', roast=item,
                            inventory=inventory, derived=derived)
 

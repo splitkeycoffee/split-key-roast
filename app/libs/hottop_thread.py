@@ -459,7 +459,8 @@ class Hottop:
         :type event: dict
         :returns: dict
         """
-        event.update({'time': self.get_roast_time()})
+        event.update({'time': self.get_roast_time(),
+                      'config': self.get_roast_properties()['last']})
         self._roast['events'].append(event)
         return self.get_roast_properties()
 

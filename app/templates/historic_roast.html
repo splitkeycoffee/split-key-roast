@@ -117,7 +117,7 @@
       $('#roast-controls').show().css('visibility', 'visible');
       $('#roast-export').show().css('visibility', 'visible');
     </script>
-    <script src="/resources/external/highcharts/highcharts.js"></script>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
     <script src="http://code.highcharts.com/modules/exporting.js"></script>
     <script src="https://code.highcharts.com/modules/offline-exporting.js"></script>
 
@@ -127,6 +127,7 @@
     $(document).ready(function () {
       mainChart.series[0].setData({{derived['s1']}});
       mainChart.series[1].setData({{derived['s2']}});
+      mainChart.series[2].setData({{derived['flags']|safe}});
       auxChart.series[0].setData({{derived['s3']}});
       auxChart.series[1].setData({{derived['s4']}});
 
