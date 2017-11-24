@@ -43,3 +43,11 @@ class InventoryForm(Form):
     origin = StringField('origin', [validators.Length(min=1, max=35)])
     method = StringField('process', [validators.Length(min=1, max=35)])
     stock = StringField('stock', [validators.Length(min=1, max=35)])
+
+
+class ProfileForm(Form):
+    """Profile form validator."""
+    coffee = StringField('coffee', [validators.Length(min=1, max=35)])
+    roast = StringField('roast', [validators.Length(min=1, max=35)])
+    drop_temp = StringField('drop_temp', [validators.Length(min=1, max=35)])
+    notes = StringField('notes', [validators.Length(min=0, max=255)])

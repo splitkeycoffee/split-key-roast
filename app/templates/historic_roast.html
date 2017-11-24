@@ -46,6 +46,54 @@
       </div>
     </div>
 
+    <div class="modal fade" id="addRoastProfile" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Add Profile</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form id="roast-profile-form">
+            <div class="modal-body">
+                <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput2">Coffee</label>
+                  <input type="text" class="form-control" id="coffee" value="{{roast.get('coffee')}}" disabled>
+                </div>
+                <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput">Roast</label>
+                  <select id="history" required>
+                    <option value="">Select level</option>
+                    <option value="light">Light</option>
+                    <option value="medium">Medium</option>
+                    <option value="dark">Dark</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput2">Drop Temperature</label>
+                  <input type="number" class="form-control" id="drop-temp" value="{{roast['last']['environment_temp']}}">
+                </div>
+                <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput2">Notes</label>
+                  <textarea class="form-control" id="profile-notes" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+              <input type="hidden" class="form-control" id="coffee" value="{{roast.get('coffee')}}">
+              <input type="hidden" class="form-control" id="date" value="{{roast.get('date')}}">
+              <input type="hidden" class="form-control" id="operator" value="{{current_user.get_name()}}">
+              <input type="hidden" class="form-control" id="roast-id" value="{{roast.get('id')}}">
+              <input type="hidden" class="form-control" id="graph-title" value="">
+              <input type="hidden" class="form-control" id="graph-subtitle" value="">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button id="update-roast" type="submit" class="btn btn-primary">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <nav class="col-sm-4 col-md-2 d-none d-sm-block bg-light sidebar">
 
       <div id="roast-profile" class="">
@@ -68,8 +116,8 @@
         <hr/>
 
         <button class="btn btn-sm btn-warning toggle-control margin-bottom-10" type="button" data-toggle="modal" data-target="#roastPropertiesModal">Edit</button>
-        <button class="btn btn-sm btn-info toggle-control margin-bottom-10" type="button">Cup Roast</button>
-        <button class="btn btn-sm btn-info toggle-control" type="button">Save as Profile</button>
+        <a href="/cup/{{roast.get('id')}}"><button class="btn btn-sm btn-info toggle-control margin-bottom-10" type="button">Cup Roast</button></a>
+        <button class="btn btn-sm btn-info toggle-control" type="button" data-toggle="modal" data-target="#addRoastProfile">Save as Profile</button>
       </div>
 
       <div id="roast-export">
@@ -98,7 +146,7 @@
             </thead>
             <tbody>
             {% for item in cuppings %}
-              <tr id="{{ item.get('id') }}">
+              <tr id="{{item.get('id')}}">
                 <td>{{item.get('label')}}</td>
                 <td>{{item.get('origin')}}</td>
                 <td>{{item.get('process')}}</td>
@@ -157,22 +205,11 @@
                         coffee: $('#graph-title').val(),
                         notes: $('#roast-notes').val()}
 
-      var subtitle = `{{roast.get('date')}}, ${properties.operator}, input: ${properties.input_weight}, output: ${properties.output_weight}`;
+      var subtitle = `{{roast.get('date')}}, ${properties.operator},
+                      input: ${properties.input_weight},
+                      output: ${properties.output_weight}`;
       mainChart.setTitle({text: "{{roast.get('name')}}"},
                          {text: subtitle});
-    });
-
-    $('#inventory').change(function() {
-      var selection = $(this).val();
-      var title = $('option:selected', this).attr('origin') + " - " + selection;
-      $('#graph-title').val(title);
-      $('#roast-id').val($('option:selected', this).attr('id'));
-      mainChart.setTitle({text: title});
-      var weight = $('option:selected', this).attr('max-weight');
-      $('input[name="input-weight"]')
-      .attr('max', weight)
-      .attr('placeholder', "Less than " + weight + " grams");
-      $('input[name="output-weight]"').attr('max', weight);
     });
 
     $('#roast-properties-form').bind("submit", function(e) {
@@ -188,15 +225,34 @@
                         output_weight: $('#output-weight').val(),
                         coffee: $('#coffee').val(),
                         notes: $('#roast-notes').val()}
-      var subtitle = `${date}, ${properties.operator}, input: ${properties.input_weight}, output: ${properties.output_weight}`;
+      var subtitle = `${date}, ${properties.operator},
+                      input: ${properties.input_weight},
+                      output: ${properties.output_weight}`;
       $('#graph-subtitle').val(subtitle);
-      mainChart.setTitle({text: $('#graph-title').val()}, {text: subtitle});
-      socket.emit('update-roast-properties', properties);
+      mainChart.setTitle({text: "{{roast.get('name')}}"}, {text: subtitle});
       $('#roastPropertiesModal').modal('hide');
-
       $('#sidebar-note').html($('#roast-notes').val());
       $('#sidebar-input-weight').html($('#input-weight').val());
       $('#sidebar-output-weight').html($('#output-weight').val());
+      socket.emit('update-roast-properties', properties);
     });
+
+    $('#roast-profile-form').bind("submit", function(e) {
+      e.preventDefault();
+      if (!e.target.checkValidity()) {
+        return false;
+      }
+      var today = new Date();
+      var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+      var properties = {
+        coffee: $('#coffee').val(),
+        roast: $('#history').find(":selected").val(),
+        drop_temp: $('#drop-temp').val(),
+        notes: $('#profile-notes').val()
+      }
+      $('#addRoastProfile').modal('hide');
+      socket.emit('save-profile', properties);
+    });
+
     </script>
 {% endblock %}

@@ -2,10 +2,54 @@
 {% block title %}Roast{% endblock %}
 {% block head %}
     {{ super() }}
-    <link href="resources/css/history.css" rel="stylesheet">
+    <link href="resources/css/profile.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
   <div class="row">
+
+    <div class="modal fade" id="addRoastProfile" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Edit Profile</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form action="/profiles/edit-profile" method="POST">
+            <div class="modal-body">
+                <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput2">Coffee</label>
+                  <input type="text" class="form-control" name="coffee" readonly>
+                </div>
+                <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput">Roast</label>
+                  <select id="history" name="roast" required>
+                    <option value="">Select level</option>
+                    <option value="light">Light</option>
+                    <option value="medium">Medium</option>
+                    <option value="dark">Dark</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput2">Drop Temperature</label>
+                  <input type="number" class="form-control" name="drop_temp" step="0.01">
+                </div>
+                <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput2">Notes</label>
+                  <textarea class="form-control" name="notes" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+              <input type="hidden" class="form-control" name="profile_id" value="">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button id="update-roast" type="submit" class="btn btn-primary">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <main role="main" class="col-md-12 pt-3">
       <h1>Profiles <span class="pull-right"><a href="/roast"><button class="btn btn-primary" type="button">New Roast</button></a></h1>
       <div class="table-responsive">
@@ -13,21 +57,26 @@
         <table class="table table-striped">
           <thead>
             <tr>
+              <th>Coffee</th>
               <th>Roast</th>
-              <th>Quantity</th>
-              <th>Duration</th>
+              <th>Drop Temperature</th>
               <th>Date</th>
+              <th>Notes</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
           {% for item in profiles %}
-            <tr>
-              <td>{{item.get('')}}</td>
-              <td>{{item.get('')}}</td>
-              <td>{{item.get('')}}</td>
-              <td>{{item.get('')}}</td>
-              <td></td>
+            <tr id="{{item.get('id')}}">
+              <td>{{item.get('coffee')}}</td>
+              <td>{{item.get('roast').title()}}</td>
+              <td>{{item.get('drop_temp')}}</td>
+              <td>{{item.get('datetime')}}</td>
+              <td>{{item.get('notes')}}</td>
+              <td>
+                <button type="button" class="btn btn-sm btn-primary edit-row">Edit</button>
+                <button type="button" class="btn btn-sm btn-danger delete-row">Delete</button>
+              </td>
             </tr>
           {% endfor %}
           </tbody>
@@ -46,4 +95,36 @@
 {% endblock %}
 {% block bottom_import %}
     {{ super() }}
+    <script type="text/javascript">
+
+      $('.delete-row').click(function(e) {
+        _this = this;
+        $.ajax({
+            url: '/profiles/remove-item',
+            type: 'post',
+            dataType: 'json',
+            contentType:'application/json',
+            data: JSON.stringify({ id: $(this).closest('tr').attr('id')}),
+            success: function(data) {
+              if (data.success) {
+                $(_this).closest('tr').remove();
+              } else {
+                $('#error-message').text(data.error).show();
+                $('#error-container').show().removeClass('hidden');
+              }
+            }
+        });
+      });
+
+      $('.edit-row').click(function(e) {
+        var row = $(this).closest('tr');
+        var columns = row.find('td');
+        $('#addRoastProfile').find('input[name="profile_id"]').val(row.attr('id'));
+        $('#addRoastProfile').find('input[name="coffee"]').val($(columns[0]).html());
+        $('#addRoastProfile').find('select[name="roast"]').val($(columns[1]).html().toLowerCase());
+        $('#addRoastProfile').find('input[name="drop_temp"]').val($(columns[2]).html());
+        $('#addRoastProfile').find('textarea[name="notes"]').val($(columns[4]).html());
+        $('#addRoastProfile').modal('show', true);
+      });
+    </script>
 {% endblock %}

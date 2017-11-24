@@ -21,7 +21,7 @@
                 <div class="form-group">
                   <label class="col-form-label" for="formGroupExampleInput">Coffee</label>
                   {% if inventory|count > 0 %}
-                  <select id="inventory">
+                  <select id="inventory" required>
                     <option value="">Select coffee</option>
                     {% for item in inventory %}
                     <option id="{{item.get('id')}}" origin="{{item.get('origin')}}" max-weight="{{item.get('stock')}}" value="{{item.get('label')}}">{{item.get('label')}}</option>
@@ -59,7 +59,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-              <input type="hidden" class="form-control" id="roast-id" value="">
+              <input type="hidden" class="form-control" id="coffee-id" value="">
               <input type="hidden" class="form-control" id="graph-title" value="">
               <input type="hidden" class="form-control" id="graph-subtitle" value="">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -197,7 +197,7 @@
       var selection = $(this).val();
       var title = $('option:selected', this).attr('origin') + " - " + selection;
       $('#graph-title').val(title);
-      $('#roast-id').val($('option:selected', this).attr('id'));
+      $('#coffee-id').val($('option:selected', this).attr('id'));
       mainChart.setTitle({text: title});
       var weight = $('option:selected', this).attr('max-weight');
       $('input[name="input-weight"]')
@@ -218,8 +218,11 @@
                         input_weight: $('#input-weight').val(),
                         output_weight: $('#output-weight').val(),
                         coffee: $('#graph-title').val(),
+                        coffee_id: $('#coffee-id').val(),
                         notes: $('#roast-notes').val()}
-      var subtitle = `${date}, ${properties.operator}, input: ${properties.input_weight}, output: ${properties.output_weight}`;
+      var subtitle = `${date}, ${properties.operator},
+                      input: ${properties.input_weight},
+                      output: ${properties.output_weight}`;
       $('#graph-subtitle').val(subtitle);
       mainChart.setTitle({text: $('#graph-title').val()}, {text: subtitle});
       socket.emit('roast-properties', properties);
