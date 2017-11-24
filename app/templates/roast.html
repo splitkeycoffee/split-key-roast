@@ -74,14 +74,20 @@
 
       <div id="roast-profile" class="">
         <h4 class="sidebar-header">Roast</h4>
-        <button class="btn btn-sm btn-primary toggle-control" type="button" data-toggle="modal" data-target="#roastPropertiesModal">Properties</button>
+        <button class="btn btn-sm btn-secondary toggle-control" type="button" data-toggle="modal" data-target="#roastPropertiesModal">Properties</button>
+      </div>
+
+      <div id="roast-connection">
+        <h4 class="sidebar-header">Roaster  <i id="connection-status" class="fa fa-circle disconnected" aria-hidden="true"></i></h4>
+        <button class="btn btn-sm btn-success toggle-control margin-bottom-10 setup" type="button" action="true">Connect</button>
+        <button class="btn btn-sm btn-warning toggle-control margin-bottom-10 shutdown" type="button" action="true">Shutdown</button>
+        <button class="btn btn-sm btn-danger toggle-control margin-bottom-10 reset" type="button" action="true">Reset</button>
       </div>
 
       <div id="roast-controls">
-        <h4 class="sidebar-header">Controls  <i id="status" class="fa fa-circle disconnected" aria-hidden="true"></i></h4>
-        <button class="btn btn-sm btn-secondary toggle-control margin-bottom-10 mock" type="button" action="true">Mock</button><br>
-        <button class="btn btn-sm btn-success toggle-control margin-bottom-10 setup" type="button" action="true">Start</button><br>
-        <button class="btn btn-sm btn-warning toggle-control margin-bottom-10 shutdown" type="button" action="true">Shutdown</button><br>
+        <h4 class="sidebar-header">Controls  <i id="monitor-status" class="fa fa-circle disconnected" aria-hidden="true"></i></h4>
+        <button class="btn btn-sm btn-success toggle-control margin-bottom-10 start-monitor" type="button" action="true" disabled>Start Monitor</button>
+        <button class="btn btn-sm btn-warning toggle-control margin-bottom-10 stop-monitor" type="button" action="true" disabled>Stop Monitor</button>
 
         <h5 class="sidebar-header">Fan</h5>
         <div id="fan-slider" class="slider">
@@ -92,9 +98,6 @@
         <div id="heat-slider" class="slider">
           <div id="heat-handle" class="ui-slider-handle"></div>
         </div>
-
-        <br>
-        <button class="btn btn-sm btn-danger toggle-control margin-bottom-10 reset" type="button" action="true">Reset</button><br>
 
 <!--         <h5 class="sidebar-header">Drum Motor</h5>
         <button id="drum-motor-btn" class="btn btn-sm toggle-control sec-control" type="button" action=""></button>
@@ -108,7 +111,7 @@
 
       <div id="roast-export">
         <h4 class="sidebar-header">Export</h4>
-        <button id="export-png" class="btn btn-sm btn-primary toggle-control margin-bottom-10">Graph</button>
+        <button id="export-png" class="btn btn-sm btn-secondary toggle-control margin-bottom-10">Graph</button>
       </div>
     </nav>
 
@@ -184,58 +187,59 @@
       }
     });
     </script>
-    <!-- <script src="resources/external/highcharts/highcharts.js"></script> -->
-    <script src="https://code.highcharts.com/stock/highstock.js"></script>
-    <script src="http://code.highcharts.com/modules/exporting.js"></script>
-    <script src="https://code.highcharts.com/modules/offline-exporting.js"></script>
 
+    <!-- Import graphing related items -->
+    <script src="/resources/external/highcharts/highstock.js"></script>
+    <script src="/resources/external/highcharts/modules/exporting.js"></script>
+    <script src="/resources/external/highcharts/modules/offline-exporting.js"></script>
     <script src="resources/js/graph.js"></script>
     <script src="resources/js/hottop.js"></script>
 
     <script type="text/javascript">
-    $('#inventory').change(function() {
-      var selection = $(this).val();
-      var title = $('option:selected', this).attr('origin') + " - " + selection;
-      $('#graph-title').val(title);
-      $('#coffee-id').val($('option:selected', this).attr('id'));
-      mainChart.setTitle({text: title});
-      var weight = $('option:selected', this).attr('max-weight');
-      $('input[name="input-weight"]')
-      .attr('max', weight)
-      .attr('placeholder', "Less than " + weight + " grams");
-      $('input[name="output-weight]"').attr('max', weight);
-    });
-
-    $('#roast-properties-form').bind("submit", function(e) {
-      e.preventDefault();
-      if (!e.target.checkValidity()) {
-        return false;
-      }
-      var today = new Date();
-      var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-      var properties = {name: $('#graph-title').val(),
-                        operator: $('#operator').val(),
-                        input_weight: $('#input-weight').val(),
-                        output_weight: $('#output-weight').val(),
-                        coffee: $('#graph-title').val(),
-                        coffee_id: $('#coffee-id').val(),
-                        notes: $('#roast-notes').val()}
-      var subtitle = `${date}, ${properties.operator},
-                      input: ${properties.input_weight},
-                      output: ${properties.output_weight}`;
-      $('#graph-subtitle').val(subtitle);
-      mainChart.setTitle({text: $('#graph-title').val()}, {text: subtitle});
-      socket.emit('roast-properties', properties);
-      $('#roastPropertiesModal').modal('hide');
-      $('#roast-controls').show().css('visibility', 'visible');
-      $('#roast-export').show().css('visibility', 'visible');
-      $(window).bind("beforeunload",function(event) {
-          return false;
+      $('#inventory').change(function() {
+        var selection = $(this).val();
+        var title = $('option:selected', this).attr('origin') + " - " + selection;
+        $('#graph-title').val(title);
+        $('#coffee-id').val($('option:selected', this).attr('id'));
+        mainChart.setTitle({text: title});
+        var weight = $('option:selected', this).attr('max-weight');
+        $('input[name="input-weight"]')
+        .attr('max', weight)
+        .attr('placeholder', "Less than " + weight + " grams");
+        $('input[name="output-weight]"').attr('max', weight);
       });
-    });
 
-    $('.reset').click(function() {
-      location.reload();
-    });
+      $('#roast-properties-form').bind("submit", function(e) {
+        e.preventDefault();
+        if (!e.target.checkValidity()) {
+          return false;
+        }
+        var today = new Date();
+        var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+        var properties = {name: $('#graph-title').val(),
+                          operator: $('#operator').val(),
+                          input_weight: $('#input-weight').val(),
+                          output_weight: $('#output-weight').val(),
+                          coffee: $('#graph-title').val(),
+                          coffee_id: $('#coffee-id').val(),
+                          notes: $('#roast-notes').val()}
+        var subtitle = `${date}, ${properties.operator},
+                        input: ${properties.input_weight},
+                        output: ${properties.output_weight}`;
+        $('#graph-subtitle').val(subtitle);
+        mainChart.setTitle({text: $('#graph-title').val()}, {text: subtitle});
+        socket.emit('roast-properties', properties);
+        $('#roastPropertiesModal').modal('hide');
+        $('#roast-controls').show().css('visibility', 'visible');
+        $('#roast-export').show().css('visibility', 'visible');
+        $(window).bind("beforeunload",function(event) {
+            return false;
+        });
+      });
+
+      $('.reset').click(function() {
+        location.reload();
+      });
+
     </script>
 {% endblock %}

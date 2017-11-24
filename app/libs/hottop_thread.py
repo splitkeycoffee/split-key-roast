@@ -13,6 +13,8 @@ import time
 from Queue import Queue
 from threading import Thread, Event
 
+from .mock import MockProcess
+
 
 class InvalidInput(Exception):
     """Exception to capture invalid input commands."""
@@ -75,37 +77,6 @@ def timedelta2period(duration):
     minutes = (seconds % 3600) // 60
     seconds = (seconds % 60)
     return '{0:0>2}:{1:0>2}'.format(minutes, seconds)
-
-
-class MockProcess(Thread):
-
-    """Mock up a thread to play around with."""
-
-    def __init__(self, config, q, logger, callback=None):
-        Thread.__init__(self)
-        self._config = config
-        self._cb = callback
-        self._log = logger
-        self._q = q
-        self.exit = Event()
-
-    def run(self):
-        import random
-        self._config['environment_temp'] = 450
-        while not self._q.empty():
-            self._config = self._q.get()
-
-        while not self.exit.is_set():
-            self._log.debug("Thread pulse")
-            self._config['environment_temp'] -= random.uniform(0, 1)
-            self._config['bean_temp'] = 200
-            self._cb(self._config)  # This gives us a way to know when to read
-            time.sleep(.5)
-
-    def shutdown(self):
-        """Register a shutdown event."""
-        self._log.debug("Shutdown initiated")
-        self.exit.set()
 
 
 class ControlProcess(Thread):
@@ -369,6 +340,7 @@ class Hottop:
         self._roast['notes'] = None
         self._roast['events'] = list()
         self._roast['last'] = dict()
+        self._roast['record'] = False
 
     def _callback(self, data):
         """Processor callback to clean-up stream data.
@@ -390,7 +362,8 @@ class Hottop:
         td = (now_time() - load_time(self._roast_start))
         output['time'] = (td.total_seconds() + 60) / 60  # Seconds since starting
         self._roast['duration'] = output['time']
-        self._roast['events'].append(copy.deepcopy(output))
+        if self._roast['record']:
+            self._roast['events'].append(copy.deepcopy(output))
         local.update({'time': output['time']})
         self._roast['last'] = local
 
@@ -533,6 +506,27 @@ class Hottop:
             if key not in valid:
                 continue
             self._roast[key] = value
+
+    def get_monitor(self):
+        """Get the monitor config.
+
+        :returns: None
+        """
+        return self._roast['record']
+
+    def set_monitor(self, monitor):
+        """Set the monitor config.
+
+        :param monitor: Value to set the monitor
+        :type monitor: bool
+        :returns: None
+        :raises: InvalidInput
+        """
+        if type(monitor) != bool:
+            raise InvalidInput("Monitor value must be bool")
+        self._roast['record'] = bool2int(monitor)
+        self._log.debug(self._config)
+        self._q.put(self._config)
 
     def get_heater(self):
         """Get the heater config.

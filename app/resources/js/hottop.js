@@ -29,12 +29,10 @@ $(document).ready(function() {
 
     socket.on('connect', function(data) {
         if (debug) { console.log("Client has connect to the server"); }
-        $('#status').toggleClass('disconnected').toggleClass('connected');
     });
 
     socket.on('disconnect', function(data) {
         if (debug) { console.log("Client has disconnected from the server"); }
-        $('#status').toggleClass('connected').toggleClass('disconnected');
         $.each($('.reading'), function( index, value ) {
             $(this).html('');
         });
@@ -61,10 +59,12 @@ $(document).ready(function() {
             initToggleControl('#solenoid-btn', 'true');
         }
 
-        $("#fan-slider" ).slider("value", settings.main_fan);
-        $('#fan-handle').text(settings.main_fan);
-        $("#heat-slider" ).slider("value", settings.heater);
-        $('#heat-handle').text(settings.heater);
+        $("#fan-slider").slider("value", 0);
+        $('#fan-handle').text(0);
+        $("#heat-slider").slider("value", 0);
+        $('#heat-handle').text(0);
+        $("#fan-slider").slider("disable");
+        $("#heat-slider").slider("disable");
     });
 
     socket.on('state', function(data) {
@@ -72,10 +72,24 @@ $(document).ready(function() {
             $('.mock').prop("disabled", true);
             $('.setup').prop("disabled", true);
             $('.shutdown').prop("disabled", false);
+            $('.start-monitor').prop("disabled", false);
+            $('.stop-monitor').prop("disabled", false);
+            $('.reset').prop("disabled", false);
+            $("#fan-slider").slider("enable");
+            $("#heat-slider").slider("enable");
         } else {
             $('.shutdown').prop("disabled", true);
             $('.mock').prop("disabled", false);
             $('.setup').prop("disabled", false);
+            $('.start-monitor').prop("disabled", true);
+            $('.stop-monitor').prop("disabled", true);
+            $('.reset').prop("disabled", true);
+            $("#fan-slider").slider("value", 0);
+            $('#fan-handle').text(0);
+            $("#heat-slider").slider("value", 0);
+            $('#heat-handle').text(0);
+            $("#fan-slider").slider("disable");
+            $("#heat-slider").slider("disable");
         }
 
         for (var key in data.config) {
@@ -86,6 +100,11 @@ $(document).ready(function() {
                 $(id).html(data.config[key]);
             }
         }
+
+        if (!data.roast.record) {
+            return false;
+        }
+
         mainChart.series[0].addPoint([data.time, data.config.environment_temp]);
         mainChart.series[1].addPoint([data.time, data.config.bean_temp]);
         // Normalize the fan data set to match the scale of heat
@@ -107,31 +126,42 @@ $(document).ready(function() {
         } else if (data.activity === "ROAST_START") {
             $('.mock').prop("disabled", true);
             $('.setup').prop("disabled", true);
+            $('#connection-status').toggleClass('disconnected').toggleClass('connected');
         } else if (data.activity === "ROAST_RESET") {
             location.reload();
         } else if (data.activity === "ROAST_SHUTDOWN") {
-            var subtitle = $('#graph-subtitle').val() + ", " + data.state.date;
+            var subtitle = $('#graph-subtitle').val();
             mainChart.setTitle({text: $('#graph-title').val()}, {text: subtitle});
             $('.mock').prop("disabled", false);
             $('.setup').prop("disabled", false);
+            $('#connection-status').toggleClass('connected').toggleClass('disconnected');
+            $('.start-monitor').prop("disabled", true);
+            $('.stop-monitor').prop("disabled", true);
+            $('.reset').prop("disabled", true);
+            $("#fan-slider").slider("disable");
+            $("#heat-slider").slider("disable");
         } else if (data.activity === "FIRST_CRACK") {
             mainChart.series[2].addPoint({
                 x: data.state.last.time,
-                title: 'First Crack (' + data.state.last.environment_temp.toFixed(0) + ", " + data.state.last.bean_temp.toFixed(0) + ")",
+                title: 'FC (' + data.state.last.environment_temp.toFixed(0) + ", " + data.state.last.bean_temp.toFixed(0) + ")",
                 text: "First Crack"
             });
         } else if (data.activity === "SECOND_CRACK") {
             mainChart.series[2].addPoint({
                 x: data.state.last.time,
-                title: 'Second Crack (' + data.state.last.environment_temp.toFixed(0) + ", " + data.state.last.bean_temp.toFixed(0) + ")",
+                title: 'SC (' + data.state.last.environment_temp.toFixed(0) + ", " + data.state.last.bean_temp.toFixed(0) + ")",
                 text: "Second Crack"
             });
         } else if (data.activity === "DROP_COFFEE") {
             mainChart.series[2].addPoint({
                 x: data.state.last.time,
-                title: 'Dropped (' + data.state.last.environment_temp.toFixed(0) + ", " + data.state.last.bean_temp.toFixed(0) + ")",
+                title: 'Drop (' + data.state.last.environment_temp.toFixed(0) + ", " + data.state.last.bean_temp.toFixed(0) + ")",
                 text: "Dropped"
             });
+        } else if (data.activity === "START_MONITOR") {
+            $('#monitor-status').toggleClass('disconnected').toggleClass('connected');
+        } else if (data.activity === "STOP_MONITOR") {
+            $('#monitor-status').toggleClass('connected').toggleClass('disconnected');
         } else {
             console.log(data);
         }
@@ -144,15 +174,25 @@ $(document).ready(function() {
 
     $('.setup').click(function(e) {
         if (debug) { console.log("Setup Initiated"); }
-        socket.emit('setup');
+        socket.emit('roaster-setup');
     });
 
     $('.shutdown').click(function(e) {
         if (debug) { console.log("Shutdown Initiated"); }
-        socket.emit('shutdown');
+        socket.emit('roaster-shutdown');
         $.each($('.reading'), function( index, value ) {
             $(this).html('-1');
         });
+    });
+
+    $('.start-monitor').click(function(e) {
+        if (debug) { console.log("Monitoring begins"); }
+        socket.emit('start-monitor');
+    });
+
+    $('.stop-monitor').click(function(e) {
+        if (debug) { console.log("Monitoring ends"); }
+        socket.emit('stop-monitor');
     });
 
     $('.fc').click(function() {

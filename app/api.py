@@ -412,29 +412,49 @@ def on_mock():
     sio.emit('activity', activity)
 
 
-@sio.on('setup')
+@sio.on('roaster-setup')
 def on_setup():
     """Establish a connection to the roaster via USB."""
-    try:
-        ht.connect()
-    except SerialConnectionError as e:
-        sio.emit('error', {'code': 'SERIAL_CONNECTION_ERROR', 'message': str(e)})
-        return
+    # try:
+    #     ht.connect()
+    # except SerialConnectionError as e:
+    #     sio.emit('error', {'code': 'SERIAL_CONNECTION_ERROR', 'message': str(e)})
+    #     return
     ht.start(on_callback)
     activity = {'activity': 'ROAST_START'}
     sio.emit('activity', activity)
 
 
-@sio.on('shutdown')
+@sio.on('roaster-shutdown')
 def on_shutdown():
     """End the connection with the roaster."""
     ht.end()
+    state = ht.set_monitor(False)
     state = ht.get_roast_properties()
     c = mongo.db[app.config['HISTORY_COLLECTION']]
     state['user'] = current_user.get_id()
     c.insert(state)
     state.pop('_id', None)  # Removes the injected mongo ID
+    c = mongo.db[app.config['INVENTORY_COLLECTION']]
+    _update = c.update({'label': state.get('coffee').split(' - ')[1]},
+                       {'$inc': {'stock': -int(state.get('input_weight'))}})
     activity = {'activity': 'ROAST_SHUTDOWN', 'state': state}
+    sio.emit('activity', activity)
+
+
+@sio.on('start-monitor')
+def on_start_monitor():
+    """Start the monitoring process."""
+    state = ht.set_monitor(True)
+    activity = {'activity': 'START_MONITOR', 'state': state}
+    sio.emit('activity', activity)
+
+
+@sio.on('stop-monitor')
+def on_stop_monitor():
+    """Stop the monitoring process."""
+    state = ht.set_monitor(False)
+    activity = {'activity': 'STOP_MONITOR', 'state': state}
     sio.emit('activity', activity)
 
 
