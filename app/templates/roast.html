@@ -137,9 +137,7 @@
           <table class="table table-sm table-bordered">
             <thead>
               <tr>
-                <th scope="col" class="tbl-label">Heater</th>
-                <th scope="col" class="tbl-label">Fan</th>
-                <th scope="col" class="tbl-label">Main Fan</th>
+                <th scope="col" class="tbl-label duration">Duration</th>
                 <th scope="col" class="tbl-label">Solenoid</th>
                 <th scope="col" class="tbl-label">Drum Motor</th>
                 <th scope="col" class="tbl-label">Cooling Motor</th>
@@ -148,9 +146,7 @@
             </thead>
             <tbody>
               <tr>
-                <td><span id="heater" class='reading'>-1</span></td>
-                <td><span id="fan" class='reading'>-1</span></td>
-                <td><span id="main-fan" class='reading'>-1</span></td>
+                <td><span id="duration" class='stopwatch'>00:00</span></td>
                 <td><span id="solenoid" class='reading'>-1</span></td>
                 <td><span id="drum-motor" class='reading'>-1</span></td>
                 <td><span id="cooling-motor" class='reading'>-1</span></td>
@@ -189,6 +185,7 @@
     </script>
 
     <!-- Import graphing related items -->
+    <script src="/resources/external/stopwatch.js"></script>
     <script src="/resources/external/highcharts/highstock.js"></script>
     <script src="/resources/external/highcharts/modules/exporting.js"></script>
     <script src="/resources/external/highcharts/modules/offline-exporting.js"></script>

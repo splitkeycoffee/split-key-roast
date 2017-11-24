@@ -121,7 +121,7 @@ $(document).ready(function () {
                 text: ''
             },
             max: 15,
-            min: 1,
+            min: 0,
             gridLineColor: '#e5e5e5',
             gridLineWidth: 1,
         },
@@ -170,7 +170,7 @@ $(document).ready(function () {
         },
         xAxis: {
             max: 15,
-            min: 1,
+            min: 0,
             title: {
                 'text': 'Minutes'
             }

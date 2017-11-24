@@ -68,7 +68,16 @@ $(document).ready(function() {
     });
 
     socket.on('state', function(data) {
-        if (data.roasting) {
+        if (data.roasting && data.roast.record) {
+            $('.mock').prop("disabled", true);
+            $('.setup').prop("disabled", true);
+            $('.shutdown').prop("disabled", true);
+            $('.start-monitor').prop("disabled", true);
+            $('.stop-monitor').prop("disabled", false);
+            $('.reset').prop("disabled", true);
+            $("#fan-slider").slider("enable");
+            $("#heat-slider").slider("enable");
+        } else if (data.roasting) {
             $('.mock').prop("disabled", true);
             $('.setup').prop("disabled", true);
             $('.shutdown').prop("disabled", false);
@@ -126,6 +135,7 @@ $(document).ready(function() {
         } else if (data.activity === "ROAST_START") {
             $('.mock').prop("disabled", true);
             $('.setup').prop("disabled", true);
+            $('.reset').prop("disabled", true);
             $('#connection-status').toggleClass('disconnected').toggleClass('connected');
         } else if (data.activity === "ROAST_RESET") {
             location.reload();
@@ -137,7 +147,7 @@ $(document).ready(function() {
             $('#connection-status').toggleClass('connected').toggleClass('disconnected');
             $('.start-monitor').prop("disabled", true);
             $('.stop-monitor').prop("disabled", true);
-            $('.reset').prop("disabled", true);
+            $('.reset').prop("disabled", false);
             $("#fan-slider").slider("disable");
             $("#heat-slider").slider("disable");
         } else if (data.activity === "FIRST_CRACK") {
@@ -160,8 +170,12 @@ $(document).ready(function() {
             });
         } else if (data.activity === "START_MONITOR") {
             $('#monitor-status').toggleClass('disconnected').toggleClass('connected');
+            $('.start-monitor').prop("disabled", true);
+            $('.shutdown').prop("disabled", true);
         } else if (data.activity === "STOP_MONITOR") {
             $('#monitor-status').toggleClass('connected').toggleClass('disconnected');
+            $('.start-monitor').prop("disabled", false);
+            $('.shutdown').prop("disabled", false);
         } else {
             console.log(data);
         }
@@ -188,11 +202,13 @@ $(document).ready(function() {
     $('.start-monitor').click(function(e) {
         if (debug) { console.log("Monitoring begins"); }
         socket.emit('start-monitor');
+        stopwatch.start();
     });
 
     $('.stop-monitor').click(function(e) {
         if (debug) { console.log("Monitoring ends"); }
         socket.emit('stop-monitor');
+        stopwatch.stop();
     });
 
     $('.fc').click(function() {

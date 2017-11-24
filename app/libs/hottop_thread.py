@@ -354,18 +354,19 @@ class Hottop:
         :type data: dict
         :returns: None
         """
-        if not self._roast_start:
-            return
         local = copy.deepcopy(data)
         output = dict()
         output['config'] = local
-        td = (now_time() - load_time(self._roast_start))
-        output['time'] = (td.total_seconds() + 60) / 60  # Seconds since starting
-        self._roast['duration'] = output['time']
+        if self._roast_start:
+            td = (now_time() - load_time(self._roast_start))
+            # Seconds since starting
+            output['time'] = ((td.total_seconds() + 60) / 60) - 1
+            self._roast['duration'] = output['time']
+            local.update({'time': output['time']})
+
         if self._roast['record']:
             self._roast['events'].append(copy.deepcopy(output))
-        local.update({'time': output['time']})
-        self._roast['last'] = local
+            self._roast['last'] = local
 
         if self._user_callback:
             self._log.debug("Passing data back to client handler")
@@ -388,8 +389,6 @@ class Hottop:
         #                                self._log, callback=self._callback)
         self._process = MockProcess(self._config, self._q, self._log,
                                     callback=self._callback)
-        self._roast_start = now_time(str=True)
-        self._roast['start_time'] = self._roast_start
         self._process.start()
         self._roasting = True
 
@@ -400,12 +399,7 @@ class Hottop:
         """
         self._process.shutdown()
         self._roasting = False
-        self._roast_end = now_time(str=True)
-        self._roast['end_time'] = self._roast_end
         self._roast['date'] = now_date(str=True)
-        et = load_time(self._roast['end_time'])
-        st = load_time(self._roast['start_time'])
-        self._roast['duration'] = timedelta2period(et - st)
 
     def drop(self):
         """Preset call to drop coffee from the roaster via thread signal.
@@ -525,8 +519,18 @@ class Hottop:
         if type(monitor) != bool:
             raise InvalidInput("Monitor value must be bool")
         self._roast['record'] = bool2int(monitor)
-        self._log.debug(self._config)
         self._q.put(self._config)
+
+        if self._roast['record']:
+            self._roast_start = now_time(str=True)
+            self._roast['start_time'] = self._roast_start
+        else:
+            self._roast_end = now_time(str=True)
+            self._roast['end_time'] = self._roast_end
+            self._roast['date'] = now_date(str=True)
+            et = load_time(self._roast['end_time'])
+            st = load_time(self._roast['start_time'])
+            self._roast['duration'] = timedelta2period(et - st)
 
     def get_heater(self):
         """Get the heater config.

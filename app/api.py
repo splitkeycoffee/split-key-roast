@@ -429,16 +429,7 @@ def on_setup():
 def on_shutdown():
     """End the connection with the roaster."""
     ht.end()
-    state = ht.set_monitor(False)
-    state = ht.get_roast_properties()
-    c = mongo.db[app.config['HISTORY_COLLECTION']]
-    state['user'] = current_user.get_id()
-    c.insert(state)
-    state.pop('_id', None)  # Removes the injected mongo ID
-    c = mongo.db[app.config['INVENTORY_COLLECTION']]
-    _update = c.update({'label': state.get('coffee').split(' - ')[1]},
-                       {'$inc': {'stock': -int(state.get('input_weight'))}})
-    activity = {'activity': 'ROAST_SHUTDOWN', 'state': state}
+    activity = {'activity': 'ROAST_SHUTDOWN', 'state': None}
     sio.emit('activity', activity)
 
 
@@ -454,6 +445,14 @@ def on_start_monitor():
 def on_stop_monitor():
     """Stop the monitoring process."""
     state = ht.set_monitor(False)
+    state = ht.get_roast_properties()
+    c = mongo.db[app.config['HISTORY_COLLECTION']]
+    state['user'] = current_user.get_id()
+    c.insert(state)
+    state.pop('_id', None)  # Removes the injected mongo ID
+    c = mongo.db[app.config['INVENTORY_COLLECTION']]
+    _update = c.update({'label': state.get('coffee').split(' - ')[1]},
+                       {'$inc': {'stock': -int(state.get('input_weight'))}})
     activity = {'activity': 'STOP_MONITOR', 'state': state}
     sio.emit('activity', activity)
 
