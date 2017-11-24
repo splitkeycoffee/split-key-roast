@@ -7,14 +7,90 @@
   <div class="row">
 
     <main role="main" class="col-sm-9 ml-sm-auto col-md-12 pt-3">
-      <div class="mt-3">
-        {% if current_user.is_authenticated %}
-          <h1>{{ current_user.get_name() }}!</h1>
-        {% endif %}
-      </div>
+      <h1>Dashboard</h1>
+        <div class="row">
+          <div class="col-md-4">
+            <div id="orders" class="graph"></div>
+          </div>
+
+          <div class="col-md-8">
+            <div id="traffic" class="graph"></div>
+          </div>
+        </div>
+
+        <hr/>
+
+        <div class="row">
+          <div class="col-md-7">
+            {% if history|count > 0 %}
+            <h2 class="sub-header">Recent Roasts <a href="/history"><i class="fa fa-link" aria-hidden="true"></i></a></h2>
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Roast</th>
+                    <th>Quantity</th>
+                    <th>Duration</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {% for item in history %}
+                  <tr id="{{ item.get('id') }}">
+                    <td><a href="/roast/{{item.get('id')}}">{{item.get('name')}}</a></td>
+                    <td>{{item.get('input_weight')}}</td>
+                    <td>{{item.get('duration')}}</td>
+                    <td>{{item.get('date')}}</td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="col-md-5">
+            {% if inventory|count > 0 %}
+            <h2 class="sub-header">Inventory <a href="/inventory"><i class="fa fa-link" aria-hidden="true"></i></a></h2>
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Origin</th>
+                    <th>Process</th>
+                    <th>Stock</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {% for item in inventory %}
+                  {% if item.get('stock')|int < 453 %}
+                  <tr id="{{item.get('id')}}" class="table-danger">
+                  {% elif item.get('stock')|int < 907 %}
+                  <tr id="{{item.get('id')}}" class="table-warning">
+                  {% else %}
+                  <tr id="{{item.get('id')}}">
+                  {% endif %}
+                    <td>{{item.get('label')}}</td>
+                    <td>{{item.get('origin')}}</td>
+                    <td>{{item.get('process')}}</td>
+                    <td>{{item.get('stock')}}</td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% endif %}
+          </div>
+        </div>
     </main>
   </div>
 {% endblock %}
 {% block bottom_import %}
     {{ super() }}
+    <script src="/resources/external/highcharts/highstock.js"></script>
+    <script src="/resources/external/highcharts/modules/exporting.js"></script>
+    <script src="/resources/external/highcharts/modules/data.js"></script>
+    <script src="/resources/external/highcharts/modules/offline-exporting.js"></script>
+    <script src="resources/js/dashboard.js"></script>
 {% endblock %}

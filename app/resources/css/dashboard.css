@@ -66,3 +66,11 @@ h1 {
 .margin-bottom-10 {
   margin-bottom: 10px;
 }
+
+.footer {
+  text-align: center;
+}
+
+.fa-heart-o {
+  color: red;
+}

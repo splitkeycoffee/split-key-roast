@@ -83,7 +83,23 @@ def debug():
 @login_required
 def root():
     """Render the index page."""
-    return render_template('index.html')
+    c = mongo.db[app.config['HISTORY_COLLECTION']]
+    items = c.find({'user': current_user.get_id()})
+    history = list()
+    for x in items:
+        x['id'] = str(x['_id'])
+        history.append(x)
+    history.sort(key=lambda x: x['end_time'], reverse=True)
+
+    c = mongo.db[app.config['INVENTORY_COLLECTION']]
+    items = c.find({'user': current_user.get_id()})
+    inventory = list()
+    for x in items:
+        x['id'] = str(x['_id'])
+        inventory.append(x)
+    inventory.sort(key=lambda x: x['stock'], reverse=False)
+
+    return render_template('index.html', history=history, inventory=inventory)
 
 
 @app.route('/login', methods=['GET', 'POST'])

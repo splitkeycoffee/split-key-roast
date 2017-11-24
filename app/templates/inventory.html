@@ -114,7 +114,13 @@
           </thead>
           <tbody>
           {% for item in inventory %}
-            <tr id="{{ item.get('id') }}">
+            {% if item.get('stock')|int < 453 %}
+            <tr id="{{item.get('id')}}" class="table-danger">
+            {% elif item.get('stock')|int < 907 %}
+            <tr id="{{item.get('id')}}" class="table-warning">
+            {% else %}
+            <tr id="{{item.get('id')}}">
+            {% endif %}
               <td>{{item.get('label')}}</td>
               <td>{{item.get('origin')}}</td>
               <td>{{item.get('process')}}</td>
