@@ -11,3 +11,4 @@ docs/s3_website.yml
 extension/Archive.zip
 venv/*
 dump.rdb
+.notes
