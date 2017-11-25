@@ -444,7 +444,7 @@ class Hottop:
         :returns: float
         """
         td = (now_time() - load_time(self._roast_start))
-        return (td.total_seconds() + 60) / 60
+        return ((td.total_seconds() + 60) / 60) - 1
 
     def get_serial_state(self):
         """Get the state of the USB connection.
