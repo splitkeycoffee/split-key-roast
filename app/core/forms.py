@@ -1,13 +1,15 @@
-from wtforms import Form, StringField, PasswordField, IntegerField, validators
+from wtforms import Form, StringField, PasswordField, validators
 
 
 class LoginForm(Form):
+
     """Login form validator."""
     email = StringField('email', [validators.Length(min=6, max=35)])
     password = PasswordField('password', [validators.DataRequired()])
 
 
 class RegisterForm(Form):
+
     """Register form."""
     email = StringField('email', [validators.Length(min=6, max=35)])
     first_name = StringField('first_name', [validators.Length(min=1, max=35)])
@@ -20,6 +22,7 @@ class RegisterForm(Form):
 
 
 class ChangePasswordForm(Form):
+
     """Change password form."""
     password = PasswordField('password', [
         validators.DataRequired(),
@@ -30,6 +33,7 @@ class ChangePasswordForm(Form):
 
 
 class AccountSettingsForm(Form):
+
     """Account settings form."""
     email = StringField('email', [validators.Length(min=6, max=35)])
     first_name = StringField('first_name', [validators.Length(min=1, max=35)])
@@ -38,6 +42,7 @@ class AccountSettingsForm(Form):
 
 
 class InventoryForm(Form):
+
     """Inventory form validator."""
     label = StringField('label', [validators.Length(min=1, max=35)])
     origin = StringField('origin', [validators.Length(min=1, max=35)])
@@ -46,6 +51,7 @@ class InventoryForm(Form):
 
 
 class ProfileForm(Form):
+
     """Profile form validator."""
     coffee = StringField('coffee', [validators.Length(min=1, max=35)])
     roast = StringField('roast', [validators.Length(min=1, max=35)])
