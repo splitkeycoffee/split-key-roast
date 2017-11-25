@@ -10,5 +10,6 @@ ssl-cert
 docs/s3_website.yml
 extension/Archive.zip
 venv/*
+venv3/*
 dump.rdb
 .notes

@@ -1,6 +1,26 @@
+#!/usr/bin/env python
 """
 Interface with the hottop roaster through the serial port.
+
+This module is split into two pieces, a controlling thread for monitoring
+data from the serial interface and a user-facing object to adjust settings or
+read content back out. It's NOT recommended to conduct roasting with this
+interface alone. Instead, it should be paired with a visual interface to avoid
+running the risk of fire, or damage. This code is provided as-is and the
+author is not responsible for any negative consequences for using the module.
+
+Marko Luther is listed in the credits here for his amazing work on Artisan. His
+application originally inspired the creation of this module and was helpful for
+understanding how to interface with the Hottop roaster serial interface.
 """
+__author__ = "Brandon Dixon"
+__copyright__ = "Copyright, Split Key Coffee"
+__credits__ = ["Brandon Dixon", "Marko Luther"]
+__license__ = "MIT"
+__version__ = "0.1.0"
+__maintainer__ = "Brandon Dixon (brandon@splitkeycoffee.com)"
+__email__ = "info@splitkeycoffee.com"
+__status__ = "BETA"
 
 import binascii
 import copy
@@ -10,18 +30,25 @@ import logging
 import serial
 import sys
 import time
-from Queue import Queue
-from threading import Thread, Event
 
-from .mock import MockProcess
+py2 = sys.version[0] == '2'
+
+if py2:
+    from Queue import Queue
+else:
+    from queue import Queue
+
+from threading import Thread, Event
 
 
 class InvalidInput(Exception):
+
     """Exception to capture invalid input commands."""
     pass
 
 
 class SerialConnectionError(Exception):
+
     """Exception to capture serial connection issues."""
     pass
 
@@ -81,10 +108,23 @@ def timedelta2period(duration):
 
 class ControlProcess(Thread):
 
-    """Primary processor to communicate with the hottop directly."""
+    """Primary processor to communicate with the hottop directly.
+
+    :param conn: Established serial connection to the Hottop
+    :type conn: Serial instance
+    :param config: Initial configurations settings
+    :type config: dict
+    :param q: Shared queue to interact with the user interface
+    :type q: Queue instance
+    :param logger: Shared logger to keep continuity
+    :type logger: Logging instance
+    :param callback: Optional callback function to stream results
+    :type callback: function
+    :returns: ControlProces instance
+    """
 
     def __init__(self, conn, config, q, logger, callback=None):
-        """Inherit from the base."""
+        """Extend threads to support more control logic."""
         Thread.__init__(self)
         self._conn = conn
         self._log = logger
@@ -97,8 +137,16 @@ class ControlProcess(Thread):
         self.cooldown = Event()
         self.exit = Event()
 
-    def get_config(self):
-        """Get the current configuration."""
+    def _generate_config(self):
+        """Generate a configuration that can be sent to the Hottop roaster.
+
+        Configuration settings need to be represented inside of a byte array
+        that is then written to the serial interface. Much of the configuration
+        is static, but control settings are also included and pulled from the
+        shared dictionary.
+
+        :returns: Byte array of the prepared configuration.
+        """
         config = bytearray([0x00]*36)
         config[0] = 0xA5
         config[1] = 0x96
@@ -117,8 +165,12 @@ class ControlProcess(Thread):
         return bytes(config)
 
     def _send_config(self):
-        """Send configuration data to the hottop."""
-        serialized = self.get_config()
+        """Send configuration data to the hottop.
+
+        :returns: bool
+        :raises: Generic exceptions if an error is identified.
+        """
+        serialized = self._generate_config()
         self._log.debug("Configuration has been serialized")
         try:
             self._conn.flushInput()
@@ -130,7 +182,13 @@ class ControlProcess(Thread):
             raise Exception(e)
 
     def _validate_checksum(self, buffer):
-        """Validate the buffer response against the checksum."""
+        """Validate the buffer response against the checksum.
+
+        When reading the serial interface, data will come back in a raw format
+        with an included checksum process.
+
+        :returns: bool
+        """
         self._log.debug("Validating the buffer")
         if len(buffer) == 0:
             self._log.debug("Buffer was empty")
@@ -145,7 +203,16 @@ class ControlProcess(Thread):
         return True
 
     def _read_settings(self, retry=True):
-        """Read the information from the Hottop."""
+        """Read the information from the Hottop.
+
+        Read the settings from the serial interface and convert them into a
+        human-readable format that can be shared back to the end-user. Reading
+        from the serial interface will occasionally produce strange results or
+        blank reads, so a retry process has been built into the function as a
+        recursive check.
+
+        :returns: dict
+        """
         if not self._conn.isOpen():
             self._conn.open()
         self._conn.flushInput()
@@ -165,7 +232,7 @@ class ControlProcess(Thread):
         settings['fan'] = hex2int(buffer[11])
         settings['main_fan'] = hex2int(buffer[12])
         et = hex2int(buffer[23] + buffer[24])
-        settings['environment_temp'] = celsius2fahrenheit(et)
+        settings['external_temp'] = celsius2fahrenheit(et)
         bt = hex2int(buffer[25] + buffer[26])
         settings['bean_temp'] = celsius2fahrenheit(bt)
         settings['solenoid'] = hex2int(buffer[16])
@@ -176,13 +243,36 @@ class ControlProcess(Thread):
         return settings
 
     def _wake_up(self):
-        """Wake the machine up to avoid race conditions."""
+        """Wake the machine up to avoid race conditions.
+
+        When first interacting with the Hottop, the machine may not wake up
+        right away which can put our reader into a death loop. This wake up
+        routine ensures we prime the roaster with some data before starting
+        our main loops to read/write data.
+
+        :returns: None
+        """
         for range in (0, 10):
             self._send_config()
             time.sleep(self._config['interval'])
 
     def run(self):
-        """Run the core loop."""
+        """Run the core loop of reading and writing configurations.
+
+        This is where all the roaster magic occurs. On the initial run, we
+        prime the roaster with some data to wake it up. Once awoke, we check
+        our shared queue to identify if the user has passed any updated
+        configuration. Once checked, start to read and write to the Hottop
+        roaster as long as the exit signal has not been set. All steps are
+        repeated after waiting for a specific time interval.
+
+        There are also specialized routines built into this function that are
+        controlled via events. These events are unique to the roasting process
+        and pre-configure the system with a configuration, so the user doesn't
+        need to do it themselves.
+
+        :returns: None
+        """
         self._wake_up()
 
         while not self._q.empty():
@@ -204,12 +294,18 @@ class ControlProcess(Thread):
             time.sleep(self._config['interval'])
 
     def drop(self):
-        """Drop the coffee for cooling."""
+        """Register a drop event to begin the cool-down process.
+
+        :returns: None
+        """
         self._log.debug("Dropping the coffee")
         self.cooldown.set()
 
     def shutdown(self):
-        """Register a shutdown event."""
+        """Register a shutdown event to stop interacting with the Hottop.
+
+        :returns: None
+        """
         self._log.debug("Shutdown initiated")
         self.exit.set()
 
@@ -288,7 +384,7 @@ class Hottop:
                 pass
         return match
 
-    def connect(self):
+    def connect(self, interface=None):
         """Connect to the USB for the hottop.
 
         Attempt to discover the USB port used for the Hottop and then form a
@@ -297,8 +393,12 @@ class Hottop:
         :returns: bool
         :raises SerialConnectionError:
         """
-        match = self._autodiscover_usb()
-        self._log.debug("Auto-discovered USB port: %s" % match)
+        if not interface:
+            match = self._autodiscover_usb()
+            self._log.debug("Auto-discovered USB port: %s" % match)
+        else:
+            self.USB_PORT = interface
+
         try:
             self._conn = serial.Serial(self.USB_PORT, baudrate=self.BAUDRATE,
                                        bytesize=self.BYTE_SIZE,
@@ -378,22 +478,25 @@ class Hottop:
         """Start the roaster control process.
 
         This function will kick off the processing thread for the Hottop and
-        register any user-defined callback function.
+        register any user-defined callback function. By default, it will not
+        begin collecting any reading information or saving it. In order to do
+        that users, must issue the monitor/record bit via `set_monitor`.
 
         :param func: Callback function for Hottop stream data
         :type func: function
         :returns: None
         """
         self._user_callback = func
-        # self._process = ControlProcess(self._conn, self._config, self._q,
-        #                                self._log, callback=self._callback)
-        self._process = MockProcess(self._config, self._q, self._log,
-                                    callback=self._callback)
+        self._process = ControlProcess(self._conn, self._config, self._q,
+                                       self._log, callback=self._callback)
         self._process.start()
         self._roasting = True
 
     def end(self):
         """End the roaster control process via thread signal.
+
+        This simply sends an exit signal to the thread, and shuts it down. In
+        order to stop monitoring, call the `set_monitor` method with false.
 
         :returns: None
         """
@@ -403,6 +506,17 @@ class Hottop:
 
     def drop(self):
         """Preset call to drop coffee from the roaster via thread signal.
+
+        This will set the following configuration on the roaster:
+        - drum_motor = 0
+        - heater = 0
+        - solenoid = 1
+        - cooling_motor = 1
+        - main_fan = 10
+
+        In order to power-off the roaster after dropping coffee, it's best to
+        use the shutdown method. It's assumed that cooling will occur for 5-10
+        minutes before shutting down.
 
         :returns: None
         """
@@ -421,6 +535,12 @@ class Hottop:
 
     def add_roast_event(self, event):
         """Add an event to the roast log.
+
+        This method should be used for registering events that may be worth
+        tracking like first crack, second crack and the dropping of coffee.
+        Similar to the standard reading output from the roaster, manually
+        created events will include the current configuration reading, time and
+        metadata passed in.
 
         :param event: Details describing what happened
         :type event: dict
@@ -510,6 +630,11 @@ class Hottop:
 
     def set_monitor(self, monitor):
         """Set the monitor config.
+
+        This module assumes that users will connect to the roaster and get
+        reading information _before_ they want to begin collecting roast
+        details. This method is critical to enabling the collection of roast
+        information and ensuring it gets saved in memory.
 
         :param monitor: Value to set the monitor
         :type monitor: bool
