@@ -42,7 +42,7 @@ def load_user(email):
 @login_manager.unauthorized_handler
 def unauthorized():
     """Redirect unauthorized users to the login page."""
-    return redirect(url_for('login'))
+    return redirect(url_for('core.login'))
 
 
 def create_app(debug=False):
