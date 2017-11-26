@@ -31,6 +31,8 @@ import serial
 import sys
 import time
 
+from .mock import MockProcess
+
 py2 = sys.version[0] == '2'
 
 if py2:
@@ -487,8 +489,10 @@ class Hottop:
         :returns: None
         """
         self._user_callback = func
-        self._process = ControlProcess(self._conn, self._config, self._q,
-                                       self._log, callback=self._callback)
+        # self._process = ControlProcess(self._conn, self._config, self._q,
+        #                                self._log, callback=self._callback)
+        self._process = MockProcess(self._config, self._q,
+                                    self._log, callback=self._callback)
         self._process.start()
         self._roasting = True
 

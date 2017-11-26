@@ -48,7 +48,7 @@ def root():
 def settings():
     """Render the settings page."""
     c = mongo.db[app.config['USERS_COLLECTION']]
-    user = c.find_one({'email': current_user.get_id()})
+    user = c.find_one({'username': current_user.get_id()})
     if not user:
         return render_template()
     user['id'] = str(user['_id'])

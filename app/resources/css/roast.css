@@ -6,6 +6,10 @@
     width: 100%;
 }
 
+.inventory-card {
+    text-align: center;
+}
+
 .roast-actions {
     text-align: center;
 }
