@@ -3,6 +3,7 @@ Split Key Roast
 Split Key Roast is a platform to manage green coffee, refine roasting profiles and perform roasting through the web. Anyone can run the platform on their system and quickly get up and running. The goal of the project is to make home roasting more accessible through sharing data and easing the overall process.
 
 Supported roasters:
+
 * Hottop KN-8828b-2k+ (pyhottop_)
 
 .. _pyhottop: https://github.com/splitkeycoffee/pyhottop
