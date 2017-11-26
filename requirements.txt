@@ -18,3 +18,4 @@ redis==2.10.6
 six==1.11.0
 Werkzeug==0.12.2
 WTForms==2.1
+pyhottop
