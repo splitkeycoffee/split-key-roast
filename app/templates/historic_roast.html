@@ -126,7 +126,6 @@
         <hr/>
 
         <button class="btn btn-sm btn-warning toggle-control margin-bottom-10" type="button" data-toggle="modal" data-target="#roastPropertiesModal">Edit</button>
-        <a href="/cup/{{roast.get('id')}}"><button class="btn btn-sm btn-info toggle-control margin-bottom-10" type="button">Cup Roast</button></a>
         <button class="btn btn-sm btn-info toggle-control" type="button" data-toggle="modal" data-target="#addRoastProfile">Save as Profile</button>
       </div>
 
@@ -140,45 +139,6 @@
     <main role="main" class="col-sm-9 ml-sm-auto col-md-10 pt-3">
       <div id="container" class="graph"></div>
       <div id="auxiliary" class="graph"></div>
-      <div class="cuppings">
-        <h4>Cups</h4>
-        <div class="table-responsive">
-          {% if cuppings|count > 0 %}
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Origin</th>
-                <th>Process</th>
-                <th>Stock</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-            {% for item in cuppings %}
-              <tr id="{{item.get('id')}}">
-                <td>{{item.get('label')}}</td>
-                <td>{{item.get('origin')}}</td>
-                <td>{{item.get('process')}}</td>
-                <td>{{item.get('stock')}}</td>
-                <td>
-                  <button type="button" class="btn btn-sm btn-primary edit-row">Edit</button>
-                  <button type="button" class="btn btn-sm btn-danger delete-row">Delete</button>
-                </td>
-              </tr>
-            {% endfor %}
-            </tbody>
-          </table>
-          {% else %}
-          <div class="card text-white bg-secondary">
-            <div class="card-body inventory-card">
-              <h4 class="card-title">Add Sample Results</h4>
-              <p class="card-text">Cupping your roasted beans lets you capture the flavor profile of the roast. Once you add cupping results, they will show up here.</p>
-            </div>
-          </div>
-          {% endif %}
-        </div>
-      </div>
     </main>
   </div>
 {% endblock %}
