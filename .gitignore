@@ -13,3 +13,4 @@ venv/*
 venv3/*
 dump.rdb
 .notes
+tools/*
