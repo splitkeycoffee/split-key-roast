@@ -23,8 +23,8 @@ class MockProcess(Thread):
 
         while not self.exit.is_set():
             self._log.debug("Thread pulse")
-            self._config['environment_temp'] -= random.uniform(0, 1)
-            self._config['bean_temp'] += random.uniform(0, 1)
+            # self._config['environment_temp'] -= random.uniform(0, 1)
+            # self._config['bean_temp'] += random.uniform(0, 1)
             self._cb(self._config)  # This gives us a way to know when to read
             time.sleep(.5)
 
