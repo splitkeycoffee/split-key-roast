@@ -147,6 +147,7 @@ def on_save_profile(state):
     c = mongo.db[app.config['PROFILE_COLLECTION']]
     item = {'coffee': state.get('coffee'), 'roast': state.get('roast'),
             'drop_temp': state.get('drop_temp'),
+            'brew_methods': state.get('brew_methods'),
             'notes': state.get('notes'), 'datetime': now_time(),
             'user': current_user.get_id()}
     _id = c.insert(item)

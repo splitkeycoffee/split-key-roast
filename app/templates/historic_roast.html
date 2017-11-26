@@ -71,6 +71,16 @@
                   </select>
                 </div>
                 <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput">Optimal Brew Methods</label>
+                  <select id="brew_methods" name="brew_methods" multiple required>
+                    <option value="pour_over">Pour-over</option>
+                    <option value="french_press">French Press</option>
+                    <option value="espresso">Espresso</option>
+                    <option value="siphon">Siphon</option>
+                    <option value="cold_brew">Cold Brew</option>
+                  </select>
+                </div>
+                <div class="form-group">
                   <label class="col-form-label" for="formGroupExampleInput2">Drop Temperature</label>
                   <input type="number" class="form-control" id="drop-temp" value="{{roast['last']['environment_temp']|int}}">
                 </div>
@@ -247,6 +257,7 @@
       var properties = {
         coffee: $('#coffee').val(),
         roast: $('#history').find(":selected").val(),
+        brew_methods: $('#brew_methods').val(),
         drop_temp: $('#drop-temp').val(),
         notes: $('#profile-notes').val()
       }

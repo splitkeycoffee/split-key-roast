@@ -32,6 +32,16 @@
                   </select>
                 </div>
                 <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput">Optimal Brew Methods</label>
+                  <select id="brew_methods" name="brew_methods" multiple required>
+                    <option value="pour_over">Pour-over</option>
+                    <option value="french_press">French Press</option>
+                    <option value="espresso">Espresso</option>
+                    <option value="siphon">Siphon</option>
+                    <option value="cold_brew">Cold Brew</option>
+                  </select>
+                </div>
+                <div class="form-group">
                   <label class="col-form-label" for="formGroupExampleInput2">Drop Temperature</label>
                   <input type="number" class="form-control" name="drop_temp">
                 </div>
@@ -59,6 +69,7 @@
             <tr>
               <th>Coffee</th>
               <th>Roast</th>
+              <th>Methods</th>
               <th>Drop Temperature</th>
               <th>Date</th>
               <th>Notes</th>
@@ -70,9 +81,13 @@
             <tr id="{{item.get('id')}}">
               <td>{{item.get('coffee')}}</td>
               <td>{{item.get('roast').title()}}</td>
+              <td>{{item.get('brew_methods')|join(',')| replace('_', ' ')}}</td>
               <td>{{item.get('drop_temp')}}</td>
               <td>{{item.get('datetime')}}</td>
-              <td>{{item.get('notes')}}</td>
+              <td>
+                <i class="fa fa-sticky-note-o" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="{{item.get('notes')}}"></i>
+                <span id="note-content">{{item.get('notes')}}</span>
+              </td>
               <td>
                 <button type="button" class="btn btn-sm btn-primary edit-row">Edit</button>
                 <button type="button" class="btn btn-sm btn-danger delete-row">Delete</button>
@@ -96,6 +111,14 @@
 {% block bottom_import %}
     {{ super() }}
     <script type="text/javascript">
+      $(function () {
+          $('[data-toggle="tooltip"]').tooltip()
+      })
+
+      String.prototype.replaceAll = function(search, replacement) {
+          var target = this;
+          return target.replace(new RegExp(search, 'g'), replacement);
+      };
 
       $('.delete-row').click(function(e) {
         _this = this;
@@ -122,8 +145,9 @@
         $('#addRoastProfile').find('input[name="profile_id"]').val(row.attr('id'));
         $('#addRoastProfile').find('input[name="coffee"]').val($(columns[0]).html());
         $('#addRoastProfile').find('select[name="roast"]').val($(columns[1]).html().toLowerCase());
-        $('#addRoastProfile').find('input[name="drop_temp"]').val($(columns[2]).html());
-        $('#addRoastProfile').find('textarea[name="notes"]').val($(columns[4]).html());
+        $('#addRoastProfile').find('select[name="brew_methods"]').val($(columns[2]).html().replaceAll(' ', '_').split(','));
+        $('#addRoastProfile').find('input[name="drop_temp"]').val($(columns[3]).html());
+        $('#addRoastProfile').find('textarea[name="notes"]').val($(columns[5]).find('#note-content').text());
         $('#addRoastProfile').modal('show', true);
       });
     </script>

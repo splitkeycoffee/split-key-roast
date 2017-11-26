@@ -1,5 +1,5 @@
 from . import core
-from .. import mongo
+from .. import mongo, logger
 from ..libs.utils import paranoid_clean
 from .forms import (
     InventoryForm, AccountSettingsForm, ChangePasswordForm, ProfileForm
@@ -37,7 +37,8 @@ def edit_profile():
         edit_id = paranoid_clean(request.form.get('profile_id'))
         c = mongo.db[app.config['PROFILE_COLLECTION']]
         item = {'coffee': form.coffee.data, 'roast': form.roast.data,
-                'drop_temp': form.drop_temp.data, 'notes': form.notes.data}
+                'drop_temp': form.drop_temp.data, 'notes': form.notes.data,
+                'brew_methods': form.brew_methods.data}
         c.update({'_id': ObjectId(edit_id)}, {'$set': item})
         return redirect(url_for('core.profiles'))
     errors = ','.join([value[0] for value in form.errors.values()])

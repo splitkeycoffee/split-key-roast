@@ -1,7 +1,15 @@
-#history {
+#history, #brew_methods {
     width: 100%;
 }
 
 .history-card {
     text-align: center;
+}
+
+.fa-sticky-note-o {
+    font-size: 25px;
+}
+
+#note-content {
+    visibility: hidden;
 }

@@ -1,4 +1,6 @@
-from wtforms import Form, StringField, PasswordField, validators
+from wtforms import (
+    Form, StringField, PasswordField, validators, SelectMultipleField
+)
 
 
 class LoginForm(Form):
@@ -57,3 +59,7 @@ class ProfileForm(Form):
     roast = StringField('roast', [validators.Length(min=1, max=35)])
     drop_temp = StringField('drop_temp', [validators.Length(min=1, max=35)])
     notes = StringField('notes', [validators.Length(min=0, max=255)])
+    choices = [('pour_over', 'pour_over'), ('french_press', 'french_press'),
+               ('espresso', 'espresso'), ('siphon', 'siphon'),
+               ('cold_brew', 'cold_brew')]
+    brew_methods = SelectMultipleField(choices=choices)
