@@ -50,6 +50,8 @@ class InventoryForm(Form):
     origin = StringField('origin', [validators.Length(min=1, max=35)])
     method = StringField('process', [validators.Length(min=1, max=35)])
     stock = StringField('stock', [validators.Length(min=1, max=35)])
+    organic = StringField('organic', [validators.Length(min=1, max=35)])
+    fair_trade = StringField('fair_trade', [validators.Length(min=1, max=35)])
 
 
 class ProfileForm(Form):

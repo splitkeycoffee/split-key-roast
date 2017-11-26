@@ -35,6 +35,8 @@ def add_inventory():
         c = mongo.db[app.config['INVENTORY_COLLECTION']]
         item = {'label': form.label.data, 'origin': form.origin.data,
                 'process': form.method.data, 'stock': int(form.stock.data),
+                'organic': form.organic.data,
+                'fair_trade': form.fair_trade.data, 'tags': list(),
                 'datetime': now_time(), 'user': current_user.get_id()}
         _id = c.insert(item)
         return redirect(url_for('core.inventory'))
@@ -53,7 +55,10 @@ def edit_inventory():
         edit_id = paranoid_clean(request.form.get('inventory_id'))
         c = mongo.db[app.config['INVENTORY_COLLECTION']]
         item = {'label': form.label.data, 'origin': form.origin.data,
-                'process': form.method.data, 'stock': form.stock.data}
+                'process': form.method.data, 'stock': form.stock.data,
+                'organic': form.organic.data,
+                'fair_trade': form.fair_trade.data, 'tags': list(),
+                }
         c.update({'_id': ObjectId(edit_id)}, {'$set': item})
         return redirect(url_for('core.inventory'))
     errors = ','.join([value[0] for value in form.errors.values()])

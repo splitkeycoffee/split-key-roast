@@ -35,6 +35,22 @@
                       </select>
                 </div>
                 <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput2">Organic</label>
+                      <select name="organic" class="form-control">
+                        <option value="true">True</option>
+                        <option value="false">False</option>
+                        <option value="unknown">Unknown</option>
+                      </select>
+                </div>
+                <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput2">Fair Trade</label>
+                      <select name="fair_trade" class="form-control">
+                        <option value="true">True</option>
+                        <option value="false">False</option>
+                        <option value="unknown">Unknown</option>
+                      </select>
+                </div>
+                <div class="form-group">
                   <label class="col-form-label" for="formGroupExampleInput2">Stock (grams)</label>
                   <input type="number" class="form-control" name="stock" placeholder="450">
                 </div>
@@ -77,6 +93,22 @@
                       </select>
                 </div>
                 <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput2">Organic</label>
+                      <select name="organic" class="form-control">
+                        <option value="true">True</option>
+                        <option value="false">False</option>
+                        <option value="unknown">Unknown</option>
+                      </select>
+                </div>
+                <div class="form-group">
+                  <label class="col-form-label" for="formGroupExampleInput2">Fair Trade</label>
+                      <select name="fair_trade" class="form-control">
+                        <option value="true">True</option>
+                        <option value="false">False</option>
+                        <option value="unknown">Unknown</option>
+                      </select>
+                </div>
+                <div class="form-group">
                   <label class="col-form-label" for="formGroupExampleInput2">Stock (grams)</label>
                   <input type="number" class="form-control" name="stock" placeholder="450">
                 </div>
@@ -108,6 +140,8 @@
               <th>Name</th>
               <th>Origin</th>
               <th>Process</th>
+              <th>Organic</th>
+              <th>Fair Trade</th>
               <th>Stock</th>
               <th></th>
             </tr>
@@ -124,6 +158,8 @@
               <td>{{item.get('label')}}</td>
               <td>{{item.get('origin')}}</td>
               <td>{{item.get('process')}}</td>
+              <td>{{item.get('organic').title()}}</td>
+              <td>{{item.get('fair_trade').title()}}</td>
               <td>{{item.get('stock')}}</td>
               <td>
                 <button type="button" class="btn btn-sm btn-primary edit-row">Edit</button>
@@ -175,7 +211,9 @@
         $('#inventoryEditModal').find('input[name="label"]').val($(columns[0]).html());
         $('#inventoryEditModal').find('input[name="origin"]').val($(columns[1]).html());
         $('#inventoryEditModal').find('select[name="method"]').val($(columns[2]).html());
-        $('#inventoryEditModal').find('input[name="stock"]').val($(columns[3]).html());
+        $('#inventoryEditModal').find('select[name="organic"]').val($(columns[3]).html().toLowerCase());
+        $('#inventoryEditModal').find('select[name="fair_trade"]').val($(columns[4]).html().toLowerCase());
+        $('#inventoryEditModal').find('input[name="stock"]').val($(columns[5]).html());
         $('#inventoryEditModal').modal('show', true);
       });
     </script>
