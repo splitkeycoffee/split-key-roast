@@ -6,13 +6,14 @@ from wtforms import (
 class LoginForm(Form):
 
     """Login form validator."""
-    email = StringField('email', [validators.Length(min=6, max=35)])
+    username = StringField('username', [validators.Length(min=6, max=35)])
     password = PasswordField('password', [validators.DataRequired()])
 
 
 class RegisterForm(Form):
 
     """Register form."""
+    username = StringField('username', [validators.Length(min=6, max=35)])
     email = StringField('email', [validators.Length(min=6, max=35)])
     first_name = StringField('first_name', [validators.Length(min=1, max=35)])
     last_name = StringField('last_name', [validators.Length(min=1, max=35)])

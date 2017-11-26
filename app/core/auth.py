@@ -21,14 +21,15 @@ def login():
     form = LoginForm(request.form)
     if request.method == 'POST' and form.validate():
         c = mongo.db[app.config['USERS_COLLECTION']]
-        user = c.find_one({"email": form.email.data})
+        user = c.find_one({"username": form.username.data})
         logger.debug("User: %s" % user)
         if user and User.validate_login(user['password'], form.password.data):
             user_obj = User(user)
             login_user(user_obj, remember=True)
             next = request.args.get('next')
             return redirect(next or url_for('core.root'))
-    return render_template('login.html')
+    errors = ','.join([value[0] for value in form.errors.values()])
+    return render_template('login.html', message=errors)
 
 
 @core.route('/logout')
@@ -44,7 +45,8 @@ def register():
     form = RegisterForm(request.form)
     if request.method == 'POST' and form.validate():
         c = mongo.db[app.config['USERS_COLLECTION']]
-        user = {"email": form.email.data, "first_name": form.first_name.data,
+        user = {"username": form.username.data, "email": form.email.data,
+                "first_name": form.first_name.data,
                 "last_name": form.last_name.data,
                 'password': generate_password_hash(form.password.data)}
         logger.debug("User: %s" % user)

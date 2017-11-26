@@ -29,11 +29,11 @@ eventlet.monkey_patch()
 
 
 @login_manager.user_loader
-def load_user(email):
+def load_user(username):
     """Create a manager to reload sessions."""
     from flask import current_app as app
     c = mongo.db[app.config['USERS_COLLECTION']]
-    u = c.find_one({"email": email})
+    u = c.find_one({"username": username})
     if not u:
         return None
     return User(u)

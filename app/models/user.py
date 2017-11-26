@@ -6,6 +6,7 @@ class User():
     """User class used in the login process."""
 
     def __init__(self, user):
+        self.username = user.get('username')
         self.email = user.get('email')
         self.first_name = user.get('first_name')
         self.last_name = user.get('last_name')
@@ -20,7 +21,7 @@ class User():
         return False
 
     def get_id(self):
-        return self.email
+        return self.username
 
     def get_name(self):
         return self.first_name + " " + self.last_name
