@@ -12,4 +12,5 @@
 
 #note-content {
     visibility: hidden;
+    display: none;
 }

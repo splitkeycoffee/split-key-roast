@@ -1,12 +1,11 @@
+"""Calls related to roast profiles."""
 from . import core
-from .. import mongo, logger
+from .. import mongo
 from ..libs.utils import paranoid_clean
-from .forms import (
-    InventoryForm, AccountSettingsForm, ChangePasswordForm, ProfileForm
-)
+from .forms import ProfileForm
 from bson.objectid import ObjectId
 from flask import (
-    render_template, redirect, url_for, jsonify, request, Response
+    render_template, redirect, url_for, jsonify, request
 )
 from flask import current_app as app
 from flask_login import login_required, current_user
@@ -33,7 +32,8 @@ def edit_profile():
     form = ProfileForm(request.form)
     if form.validate():
         if 'profile_id' not in request.form:
-            return jsonify({'success': False, 'error': 'ID not found in edit!'})
+            return jsonify({'success': False,
+                            'error': 'ID not found in edit!'})
         edit_id = paranoid_clean(request.form.get('profile_id'))
         c = mongo.db[app.config['PROFILE_COLLECTION']]
         item = {'coffee': form.coffee.data, 'roast': form.roast.data,
@@ -51,7 +51,8 @@ def remove_profile():
     """Render the index page."""
     args = request.get_json()
     if 'id' not in args:
-        return jsonify({'success': False, 'error': 'ID not found in request!'})
+        return jsonify({'success': False,
+                        'error': 'ID not found in request!'})
     c = mongo.db[app.config['PROFILE_COLLECTION']]
     remove_id = paranoid_clean(args.get('id'))
     c.remove({'_id': ObjectId(remove_id)})

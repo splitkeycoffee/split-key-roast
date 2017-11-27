@@ -22,6 +22,10 @@ Install the requirements via pip:
 
     $ pip install -r requirements.txt
 
+Run an instance of redis server in another terminal tab:
+
+    $ redis-server
+
 Run the application locally:
 
     $ sudo python server.py

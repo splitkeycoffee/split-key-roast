@@ -1,14 +1,13 @@
+"""Generic calls within the application."""
 from . import core
 from .. import mongo
 from ..libs.utils import paranoid_clean
-from .forms import (
-    InventoryForm, AccountSettingsForm, ChangePasswordForm, ProfileForm
-)
+from .forms import AccountSettingsForm, ChangePasswordForm
 from bson.objectid import ObjectId
+from flask import current_app as app
 from flask import (
     render_template, redirect, url_for, jsonify, request, Response
 )
-from flask import current_app as app
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 import json
@@ -63,7 +62,8 @@ def update_account():
     form = AccountSettingsForm(request.form)
     if form.validate():
         if 'user_id' not in request.form:
-            return jsonify({'success': False, 'error': 'ID not found in edit!'})
+            return jsonify({'success': False,
+                            'error': 'ID not found in edit!'})
         edit_id = paranoid_clean(request.form.get('user_id'))
         c = mongo.db[app.config['USERS_COLLECTION']]
         item = {'first_name': form.first_name.data,
@@ -82,7 +82,8 @@ def account_change_password():
     form = ChangePasswordForm(request.form)
     if form.validate():
         if 'user_id' not in request.form:
-            return jsonify({'success': False, 'error': 'ID not found in edit!'})
+            return jsonify({'success': False,
+                            'error': 'ID not found in edit!'})
         edit_id = paranoid_clean(request.form.get('user_id'))
         c = mongo.db[app.config['USERS_COLLECTION']]
         item = {'password': generate_password_hash(form.password.data)}

@@ -1,14 +1,10 @@
+"""Calls related to roasting."""
 from . import core
 from .. import mongo
 from ..libs.utils import paranoid_clean
-from .forms import (
-    InventoryForm, AccountSettingsForm, ChangePasswordForm, ProfileForm
-)
 from bson.objectid import ObjectId
-from flask import (
-    render_template, redirect, url_for, jsonify, request, Response
-)
 from flask import current_app as app
+from flask import render_template, jsonify
 from flask_login import login_required, current_user
 
 

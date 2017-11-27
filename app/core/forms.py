@@ -1,3 +1,4 @@
+"""Various forms used within the application."""
 from wtforms import (
     Form, StringField, PasswordField, validators, SelectMultipleField
 )
@@ -6,6 +7,7 @@ from wtforms import (
 class LoginForm(Form):
 
     """Login form validator."""
+
     username = StringField('username', [validators.Length(min=6, max=35)])
     password = PasswordField('password', [validators.DataRequired()])
 
@@ -13,6 +15,7 @@ class LoginForm(Form):
 class RegisterForm(Form):
 
     """Register form."""
+
     username = StringField('username', [validators.Length(min=6, max=35)])
     email = StringField('email', [validators.Length(min=6, max=35)])
     first_name = StringField('first_name', [validators.Length(min=1, max=35)])
@@ -27,6 +30,7 @@ class RegisterForm(Form):
 class ChangePasswordForm(Form):
 
     """Change password form."""
+
     password = PasswordField('password', [
         validators.DataRequired(),
         validators.EqualTo('password_confirm', message='Passwords must match')
@@ -38,6 +42,7 @@ class ChangePasswordForm(Form):
 class AccountSettingsForm(Form):
 
     """Account settings form."""
+
     email = StringField('email', [validators.Length(min=6, max=35)])
     first_name = StringField('first_name', [validators.Length(min=1, max=35)])
     last_name = StringField('last_name', [validators.Length(min=1, max=35)])
@@ -47,6 +52,7 @@ class AccountSettingsForm(Form):
 class InventoryForm(Form):
 
     """Inventory form validator."""
+
     label = StringField('label', [validators.Length(min=1, max=35)])
     origin = StringField('origin', [validators.Length(min=1, max=35)])
     method = StringField('process', [validators.Length(min=1, max=35)])
@@ -58,6 +64,7 @@ class InventoryForm(Form):
 class ProfileForm(Form):
 
     """Profile form validator."""
+
     coffee = StringField('coffee', [validators.Length(min=1, max=35)])
     roast = StringField('roast', [validators.Length(min=1, max=35)])
     drop_temp = StringField('drop_temp', [validators.Length(min=1, max=35)])

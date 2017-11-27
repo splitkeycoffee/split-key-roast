@@ -1,18 +1,12 @@
-from .. import mongo, logger
-from ..core.forms import (
-    LoginForm, RegisterForm, InventoryForm, AccountSettingsForm,
-    ChangePasswordForm, ProfileForm
-)
-from flask_login import (
-    LoginManager, login_user, logout_user, login_required, current_user
-)
-from flask import (
-    render_template, redirect, url_for, jsonify, request, Response
-)
-from flask import current_app as app
-from werkzeug.security import generate_password_hash
-from ..models.user import User
+"""Handle actions associated with authentication."""
 from . import core
+from .. import mongo, logger
+from ..core.forms import LoginForm, RegisterForm
+from ..models.user import User
+from flask import current_app as app
+from flask import render_template, redirect, url_for, request
+from flask_login import login_user, logout_user
+from werkzeug.security import generate_password_hash
 
 
 @core.route('/login', methods=['GET', 'POST'])
@@ -55,3 +49,10 @@ def register():
         return redirect(next or url_for('core.login'))
     errors = ','.join([value[0] for value in form.errors.values()])
     return render_template('register.html', message=errors)
+
+
+@core.route('/forgot-password')
+def forgot_password():
+    """Handle the forgot password process."""
+    # TODO: Implement a forgot password function
+    return redirect(url_for('core.login'))

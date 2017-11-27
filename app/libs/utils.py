@@ -1,6 +1,8 @@
+"""Utility functions."""
+
+
 def to_bool(value):
-    """
-    Take in a value and convert it to a boolean type.
+    """Take a value and convert it to a boolean type.
 
     :param value: string or int signifying a bool
     :type value: str
@@ -24,16 +26,14 @@ def now_time(str=True):
 
 
 def paranoid_clean(query_value):
-    """Takes in a user's query value and cleans it up to ensure we don't end
-    up with something we can't account for.
+    """Take a user query value and cleans.
 
     :param query_value: query value to clean up
     :type query_value: str
     :returns: string a clean value
     """
-    if query_value == None:
+    if not query_value:
         return ''
-
     remove = ['{', '}', '<', '>', '"', "'", ";"]
     for item in remove:
         query_value = query_value.replace(item, '')

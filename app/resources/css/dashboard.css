@@ -71,6 +71,14 @@ h1 {
   text-align: center;
 }
 
-.fa-heart-o {
+.fa-heart {
   color: red;
+}
+
+.fa-coffee {
+  color: white;
+}
+
+a.footer-link:link {
+  color: #cfcfcf;
 }

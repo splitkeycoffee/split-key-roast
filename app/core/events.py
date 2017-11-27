@@ -1,9 +1,16 @@
+"""Handle all events from the websocket connections.
+
+For the most part, these socket functions will only be called when performing
+a roast. If the roast page is open or we need to pass graph data, we will use
+the websocket calls.
+"""
 from .. import logger, sio, ht, mongo
 from ..libs.utils import to_bool, now_time, paranoid_clean
 from bson.objectid import ObjectId
 from flask import current_app as app
 from flask import jsonify, request
 from flask_login import current_user
+from pyhottop.pyhottop import SerialConnectionError
 
 
 @sio.on('connect')
@@ -21,8 +28,12 @@ def on_disconnect():
 
 
 def on_callback(data):
-    """Callback handler to stream data into the browser."""
-    # logger.debug("User callback: %s" % str(data))
+    """Callback handler to stream data into the browser.
+
+    Despite not being decorated, this function will still be able to send data
+    back through socketio via the redis manager.
+    """
+    logger.debug("User callback: %s" % str(data))
     sio.emit('state', data)
 
 
@@ -37,11 +48,12 @@ def on_mock():
 @sio.on('roaster-setup')
 def on_setup():
     """Establish a connection to the roaster via USB."""
-    # try:
-    #     ht.connect()
-    # except SerialConnectionError as e:
-    #     sio.emit('error', {'code': 'SERIAL_CONNECTION_ERROR', 'message': str(e)})
-    #     return
+    try:
+        ht.connect()
+    except SerialConnectionError as e:
+        sio.emit('error', {'code': 'SERIAL_CONNECTION_ERROR',
+                           'message': str(e)})
+        return False
     ht.start(on_callback)
     activity = {'activity': 'ROAST_START'}
     sio.emit('activity', activity)
@@ -73,8 +85,8 @@ def on_stop_monitor():
     c.insert(state)
     state.pop('_id', None)  # Removes the injected mongo ID
     c = mongo.db[app.config['INVENTORY_COLLECTION']]
-    _update = c.update({'label': state.get('coffee').split(' - ')[1]},
-                       {'$inc': {'stock': -int(state.get('input_weight'))}})
+    _id = c.update({'label': state.get('coffee').split(' - ')[1]},
+                   {'$inc': {'stock': -int(state.get('input_weight'))}})
     activity = {'activity': 'STOP_MONITOR', 'state': state}
     sio.emit('activity', activity)
 
@@ -127,6 +139,7 @@ def on_roast_properties(state):
 @sio.on('update-roast-properties')
 def on_update_roast_properties(state):
     """Update the roast properties."""
+    # TODO: Revisit if this is needed as a websocket call
     logger.debug("Updated Roast Properties: %s" % state)
     c = mongo.db[app.config['HISTORY_COLLECTION']]
     roast_id = paranoid_clean(state.get('id'))
@@ -143,6 +156,7 @@ def on_update_roast_properties(state):
 @sio.on('save-profile')
 def on_save_profile(state):
     """Save the roast profile."""
+    # TODO: Revisit if this is needed as a websocket call
     logger.debug("Roast Profile: %s" % state)
     c = mongo.db[app.config['PROFILE_COLLECTION']]
     item = {'coffee': state.get('coffee'), 'roast': state.get('roast'),
