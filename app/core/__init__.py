@@ -13,6 +13,7 @@ from . import (
     forms,
     generic,
     history,
+    integrations,
     inventory,
     profiles,
     roast,

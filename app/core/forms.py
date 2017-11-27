@@ -1,6 +1,7 @@
 """Various forms used within the application."""
 from wtforms import (
-    Form, StringField, PasswordField, validators, SelectMultipleField
+    Form, StringField, PasswordField, validators, SelectMultipleField,
+    BooleanField
 )
 
 
@@ -73,3 +74,17 @@ class ProfileForm(Form):
                ('espresso', 'espresso'), ('siphon', 'siphon'),
                ('cold_brew', 'cold_brew')]
     brew_methods = SelectMultipleField(choices=choices)
+
+
+class IntegrationTwitterbot(Form):
+
+    """Integration Twitter Bot form validator."""
+
+    status = BooleanField('status', [validators.required()])
+    consumer_key = StringField('consumer_key', [validators.required()])
+    consumer_secret = StringField('consumer_secret', [validators.required()])
+    access_token_key = StringField('access_token_key', [validators.required()])
+    access_token_secret = StringField('access_token_secret', [validators.required()])
+    tweet_roast_begin = BooleanField('tweet_roast_begin', default=False)
+    tweet_roast_progress = BooleanField('tweet_roast_progress', default=False)
+    tweet_roast_complete = BooleanField('tweet_roast_complete', default=False)
