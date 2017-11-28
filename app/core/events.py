@@ -4,7 +4,7 @@ For the most part, these socket functions will only be called when performing
 a roast. If the roast page is open or we need to pass graph data, we will use
 the websocket calls.
 """
-from .. import logger, sio, ht, mongo
+from .. import logger, sio, ht, mongo, tweet_hook
 from ..libs.utils import to_bool, now_time, paranoid_clean
 from bson.objectid import ObjectId
 from flask import current_app as app
@@ -35,6 +35,7 @@ def on_callback(data):
     """
     logger.debug("User callback: %s" % str(data))
     sio.emit('state', data)
+    return data
 
 
 @sio.on('mock')
@@ -46,17 +47,19 @@ def on_mock():
 
 
 @sio.on('roaster-setup')
+@tweet_hook
 def on_setup():
     """Establish a connection to the roaster via USB."""
-    try:
-        ht.connect()
-    except SerialConnectionError as e:
-        sio.emit('error', {'code': 'SERIAL_CONNECTION_ERROR',
-                           'message': str(e)})
-        return False
+    # try:
+    #     ht.connect()
+    # except SerialConnectionError as e:
+    #     sio.emit('error', {'code': 'SERIAL_CONNECTION_ERROR',
+    #                        'message': str(e)})
+    #     return False
     ht.start(on_callback)
     activity = {'activity': 'ROAST_START'}
     sio.emit('activity', activity)
+    return activity
 
 
 @sio.on('roaster-shutdown')
@@ -68,14 +71,17 @@ def on_shutdown():
 
 
 @sio.on('start-monitor')
+@tweet_hook
 def on_start_monitor():
     """Start the monitoring process."""
     state = ht.set_monitor(True)
     activity = {'activity': 'START_MONITOR', 'state': state}
     sio.emit('activity', activity)
+    return activity
 
 
 @sio.on('stop-monitor')
+@tweet_hook
 def on_stop_monitor():
     """Stop the monitoring process."""
     state = ht.set_monitor(False)
@@ -89,15 +95,18 @@ def on_stop_monitor():
                    {'$inc': {'stock': -int(state.get('input_weight'))}})
     activity = {'activity': 'STOP_MONITOR', 'state': state}
     sio.emit('activity', activity)
+    return activity
 
 
 @sio.on('drop')
+@tweet_hook
 def on_drop():
     """Drop the coffee and begin the cool-down."""
     ht.drop()
     state = ht.add_roast_event({'event': 'Drop Coffee'})
     activity = {'activity': 'DROP_COFFEE', 'state': state}
     sio.emit('activity', activity)
+    return activity
 
 
 @sio.on('reset')
@@ -110,30 +119,36 @@ def on_reset():
 
 
 @sio.on('first-crack')
+@tweet_hook
 def on_first_crack():
     """Register the first crack event."""
     logger.debug("First crack")
     state = ht.add_roast_event({'event': 'First Crack'})
     activity = {'activity': 'FIRST_CRACK', 'state': state}
     sio.emit('activity', activity)
+    return activity
 
 
 @sio.on('second-crack')
+@tweet_hook
 def on_second_crack():
     """Register the second crack event."""
     logger.debug("Second crack")
     state = ht.add_roast_event({'event': 'Second Crack'})
     activity = {'activity': 'SECOND_CRACK', 'state': state}
     sio.emit('activity', activity)
+    return activity
 
 
 @sio.on('roast-properties')
+# @tweet_hook
 def on_roast_properties(state):
     """Update the roast properties."""
     logger.debug("Roast Properties: %s" % state)
     ht.set_roast_properties(state)
     activity = {'activity': 'ROAST_PROPERTIES', 'state': state}
     sio.emit('activity', activity)
+    return activity
 
 
 @sio.on('update-roast-properties')

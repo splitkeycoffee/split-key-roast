@@ -5,14 +5,19 @@ This file will initialize all of the global variables used within the rest of
 the application. Anything needed for the app context will be done within the
 `create_app` function and returned back to the caller handler.
 """
+from flask import current_app as app
 from flask import Flask, redirect, url_for
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 from flask_pymongo import PyMongo
 from flask_socketio import SocketIO
-from pyhottop.pyhottop import Hottop
+from models.const import creatives
 from models.user import User
+# from pyhottop.pyhottop import Hottop
+from libs.hottop_thread import Hottop
+from libs.utils import timedelta2period
 import eventlet
 import logging
+import random
 import socketio
 import sys
 
@@ -31,6 +36,50 @@ shandler.setFormatter(logging.Formatter(fmt))
 logger.addHandler(shandler)
 
 eventlet.monkey_patch()
+
+
+def tweet_hook(func):
+    """Decorator to run tweets if the integration is enabled."""
+    def wrapper(*args, **kwargs):
+        results = func(*args, **kwargs)
+        c = mongo.db[app.config['USERS_COLLECTION']]
+        user = c.find_one({"username": current_user.get_id()})
+        integrations = user.get('integrations')
+
+        twitter = integrations.get('twitter_bot')
+        if not twitter.get('status'):
+            return results
+
+        action = func.func_name
+        base = creatives.get(func.func_name)
+        creative = base[random.randint(0, len(base)-1)]
+        if action == 'on_start_monitor':
+            state = results['state']
+            creative += " %s grams of %s " % (
+                state['input_weight'], state['coffee'])
+        if action == 'on_stop_monitor':
+            state = results['state']
+            creative += " Total time: %s " % (state['duration'])
+        if action in ['on_first_crack', 'on_second_crack', 'on_drop']:
+            state = results['state']
+            last = state['last']
+            creative += " State: ET %d, BT %d, Time %s " % (
+                last['environment_temp'], last['bean_temp'],
+                results['state']['duration'])
+        tags = 0
+        tag_count = random.randint(2, 8)
+        hashtags = creatives.get('hash_tags')
+        while len(creative) <= 160:
+            if tags == tag_count:
+                break
+            creative += hashtags[random.randint(0, len(hashtags)-1)] + " "
+            tags += 1
+
+        # Add in Tweet code here
+        logger.debug(creative)
+
+        return results
+    return wrapper
 
 
 @login_manager.user_loader

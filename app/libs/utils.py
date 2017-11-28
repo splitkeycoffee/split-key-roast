@@ -39,3 +39,11 @@ def paranoid_clean(query_value):
         query_value = query_value.replace(item, '')
     query_value = query_value.rstrip().lstrip().strip()
     return query_value
+
+
+def timedelta2period(duration):
+    """Convert timedelta to different formats."""
+    seconds = duration.seconds
+    minutes = (seconds % 3600) // 60
+    seconds = (seconds % 60)
+    return '{0:0>2}:{1:0>2}'.format(minutes, seconds)

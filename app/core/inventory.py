@@ -55,7 +55,7 @@ def edit_inventory():
         edit_id = paranoid_clean(request.form.get('inventory_id'))
         c = mongo.db[app.config['INVENTORY_COLLECTION']]
         item = {'label': form.label.data, 'origin': form.origin.data,
-                'process': form.method.data, 'stock': form.stock.data,
+                'process': form.method.data, 'stock': int(form.stock.data),
                 'organic': form.organic.data,
                 'fair_trade': form.fair_trade.data, 'tags': list(),
                 }

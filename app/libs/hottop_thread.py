@@ -465,6 +465,9 @@ class Hottop:
             output['time'] = ((td.total_seconds() + 60) / 60) - 1
             self._roast['duration'] = output['time']
             local.update({'time': output['time']})
+            ct = load_time(now_time(str=True))
+            st = load_time(self._roast['start_time'])
+            self._roast['duration'] = timedelta2period(ct - st)
 
         if self._roast['record']:
             self._roast['events'].append(copy.deepcopy(output))
@@ -660,6 +663,7 @@ class Hottop:
             et = load_time(self._roast['end_time'])
             st = load_time(self._roast['start_time'])
             self._roast['duration'] = timedelta2period(et - st)
+        return self.get_roast_properties()
 
     def get_heater(self):
         """Get the heater config.
