@@ -64,9 +64,9 @@ def add_brew():
                 'input_weight': float(form.input_weight.data),
                 'output_weight': float(form.output_weight.data),
                 'brew_time': form.brew_time.data,
-                'dry_smell': form.dry_smell.data,
-                'grind_smell': form.grind_smell.data,
-                'wet_smell': form.wet_smell.data,
+                'dry_smell': form.dry_smell.data.split(','),
+                'grind_smell': form.grind_smell.data.split(','),
+                'wet_smell': form.wet_smell.data.split(','),
                 'tasting_notes': form.tasting_notes.data,
                 'tags': list(),
                 'datetime': now_time(),
@@ -98,9 +98,9 @@ def edit_brew():
                 'input_weight': float(form.input_weight.data),
                 'output_weight': float(form.output_weight.data),
                 'brew_time': form.brew_time.data,
-                'dry_smell': form.dry_smell.data,
-                'grind_smell': form.grind_smell.data,
-                'wet_smell': form.wet_smell.data,
+                'dry_smell': form.dry_smell.data.split(','),
+                'grind_smell': form.grind_smell.data.split(','),
+                'wet_smell': form.wet_smell.data.split(','),
                 'tasting_notes': form.tasting_notes.data}
         c.update({'_id': ObjectId(edit_id)}, {'$set': item})
         return redirect(url_for('core.brews'))

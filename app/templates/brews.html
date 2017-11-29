@@ -3,6 +3,7 @@
 {% block head %}
     {{ super() }}
     <link href="/resources/css/brews.css" rel="stylesheet">
+    <link href="/resources/external/jquery-tageditor/jquery.tag-editor.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
   <div class="row">
@@ -59,17 +60,17 @@
 
               <div class="form-group">
                 <label class="col-form-label" for="formGroupExampleInput2">Dry Smell</label>
-                <input type="text" class="form-control" name="dry_smell">
+                <input id="add_dry_smell" type="text" class="form-control tag-support" name="dry_smell">
               </div>
 
               <div class="form-group">
                 <label class="col-form-label" for="formGroupExampleInput2">Grind Smell</label>
-                <input type="text" class="form-control" name="grind_smell">
+                <input type="text" class="form-control tag-support" name="grind_smell">
               </div>
 
               <div class="form-group">
                 <label class="col-form-label" for="formGroupExampleInput2">Wet Smell</label>
-                <input type="text" class="form-control" name="wet_smell">
+                <input type="text" class="form-control tag-support" name="wet_smell">
               </div>
 
               <div class="form-group">
@@ -141,17 +142,17 @@
 
               <div class="form-group">
                 <label class="col-form-label" for="formGroupExampleInput2">Dry Smell</label>
-                <input type="text" class="form-control" name="dry_smell">
+                <input id="edit_dry_smell" type="text" class="form-control tag-support" name="dry_smell">
               </div>
 
               <div class="form-group">
                 <label class="col-form-label" for="formGroupExampleInput2">Grind Smell</label>
-                <input type="text" class="form-control" name="grind_smell">
+                <input type="text" class="form-control tag-support" name="grind_smell">
               </div>
 
               <div class="form-group">
                 <label class="col-form-label" for="formGroupExampleInput2">Wet Smell</label>
-                <input type="text" class="form-control" name="wet_smell">
+                <input type="text" class="form-control tag-support" name="wet_smell">
               </div>
 
               <div class="form-group">
@@ -210,9 +211,9 @@
               <td>
                 <button type="button" class="btn btn-sm btn-primary edit-row">Edit</button>
                 <button type="button" class="btn btn-sm btn-danger delete-row">Delete</button>
-                <input type="hidden" class="form-control" name="dry_smell" value="{{item.get('dry_smell')}}">
-                <input type="hidden" class="form-control" name="grind_smell" value="{{item.get('grind_smell')}}">
-                <input type="hidden" class="form-control" name="wet_smell" value="{{item.get('wet_smell')}}">
+                <input type="hidden" class="form-control" name="dry_smell" value="{{item.get('dry_smell') |join(',')}}">
+                <input type="hidden" class="form-control" name="grind_smell" value="{{item.get('grind_smell')|join(',')}}">
+                <input type="hidden" class="form-control" name="wet_smell" value="{{item.get('wet_smell')|join(',')}}">
               </td>
             </tr>
           {% endfor %}
@@ -232,7 +233,11 @@
 {% endblock %}
 {% block bottom_import %}
     {{ super() }}
+    <script src="/resources/external/jquery-tageditor/jquery.caret.min.js" type="text/javascript"></script>
+    <script src="/resources/external/jquery-tageditor/jquery.tag-editor.min.js" type="text/javascript"></script>
     <script type="text/javascript">
+      $('.tag-support').tagEditor();
+
       $('#roasts').change(function() {
         var selection = $(this).val();
         $('input[name="roast_id"]').val($('option:selected', this).attr('id'));
@@ -276,9 +281,12 @@
         $('#brewEditModal').find('input[name="input_weight"]').val($(columns[3]).html());
         $('#brewEditModal').find('input[name="output_weight"]').val($(columns[4]).html());
         $('#brewEditModal').find('input[name="brew_time"]').val($(columns[5]).html());
-        $('#brewEditModal').find('input[name="dry_smell"]').val($(columns[7]).find('input[name="dry_smell"]').val());
-        $('#brewEditModal').find('input[name="grind_smell"]').val($(columns[7]).find('input[name="grind_smell"]').val());
-        $('#brewEditModal').find('input[name="wet_smell"]').val($(columns[7]).find('input[name="wet_smell"]').val());
+        $('#brewEditModal').find('input[name="dry_smell"]').tagEditor('destroy');
+        $('#brewEditModal').find('input[name="dry_smell"]').tagEditor({initialTags: $(columns[7]).find('input[name="dry_smell"]').val().split(',')});
+        $('#brewEditModal').find('input[name="grind_smell"]').tagEditor('destroy');
+        $('#brewEditModal').find('input[name="grind_smell"]').tagEditor({initialTags: $(columns[7]).find('input[name="grind_smell"]').val().split(',')});
+        $('#brewEditModal').find('input[name="wet_smell"]').tagEditor('destroy');
+        $('#brewEditModal').find('input[name="wet_smell"]').tagEditor({initialTags: $(columns[7]).find('input[name="wet_smell"]').val().split(',')});
         $('#brewEditModal').find('textarea[name="tasting_notes"]').val($(columns[6]).find('#note-content').text());
         $('#brewEditModal').modal('show', true);
       });
