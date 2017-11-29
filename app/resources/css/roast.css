@@ -132,3 +132,13 @@ td {
     margin-bottom: 10px;
     margin-top: 10px;
 }
+
+.hidden {
+    visibility: hidden;
+    display: none;
+}
+
+#note-content {
+    visibility: hidden;
+    display: none;
+}

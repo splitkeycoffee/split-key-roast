@@ -1,0 +1,21 @@
+.fa {
+  font-size: 20px;
+}
+
+.brew-card {
+    text-align: center;
+}
+
+.hidden {
+    visibility: hidden;
+    display: none;
+}
+
+#roasts, #brew_method {
+    width: 100%;
+}
+
+#note-content {
+    visibility: hidden;
+    display: none;
+}

@@ -59,6 +59,15 @@ def historic_roast(roast_id):
     # Collect the cupping data
     cuppings = list()
 
+    # Collect the brew data
+    c = mongo.db[app.config['BREWS_COLLECTION']]
+    items = c.find({'user': current_user.get_id(), 'roast_id': roast_id})
+    brews = list()
+    for x in items:
+        x['id'] = str(x['_id'])
+        brews.append(x)
+    brews.sort(key=lambda x: x['datetime'], reverse=True)
+
     return render_template('historic_roast.html', roast=item,
                            inventory=inventory, derived=derived,
-                           cuppings=cuppings)
+                           cuppings=cuppings, brews=brews)

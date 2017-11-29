@@ -9,6 +9,7 @@ core = Blueprint('core', __name__)
 
 from . import (
     auth,
+    brews,
     events,
     forms,
     generic,

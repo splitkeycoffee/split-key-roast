@@ -109,10 +109,11 @@ def create_app(debug=False):
     app = Flask(__name__, static_folder='./resources')
     app.config['SECRET_KEY'] = 'iqR2cYJp93PuuO8VbK1Z'
     app.config['MONGO_DBNAME'] = 'cloud_cafe'
-    app.config['USERS_COLLECTION'] = 'accounts'
-    app.config['INVENTORY_COLLECTION'] = 'inventory'
+    app.config['BREWS_COLLECTION'] = 'brews'
     app.config['HISTORY_COLLECTION'] = 'history'
+    app.config['INVENTORY_COLLECTION'] = 'inventory'
     app.config['PROFILE_COLLECTION'] = 'profiles'
+    app.config['USERS_COLLECTION'] = 'accounts'
     login_manager.init_app(app)
     mongo.init_app(app)
     sio.init_app(app)

@@ -1,0 +1,286 @@
+{% extends "layout/base.html" %}
+{% block title %}Brews{% endblock %}
+{% block head %}
+    {{ super() }}
+    <link href="/resources/css/brews.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+  <div class="row">
+
+    <div class="modal fade" id="brewModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">New Brew</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+
+          <form action="/brews/add-brew" method="POST">
+            <div class="modal-body">
+              <div class="form-group">
+                <label class="col-form-label" for="formGroupExampleInput2">Roast</label>
+                {% if roasts|count > 0 %}
+                <select id="roasts" required>
+                  <option value="">Select roast</option>
+                  {% for item in roasts %}
+                  <option id="{{item.get('id')}}" coffee="{{item.get('coffee')}}" date="{{item.get('date')}}" value="{{item.get('id')}}">{{item.get('date')}} {{item.get('coffee')}} ({{item.get('input_weight')}})</option>
+                  {% endfor %}
+                </select>
+                {% endif %}
+              </div>
+
+              <div class="form-group">
+                <label class="col-form-label" for="formGroupExampleInput2">Brew Method</label>
+                <select id="brew_method" name="brew_method" required>
+                  <option value="pour_over">Pour-over</option>
+                  <option value="french_press">French Press</option>
+                  <option value="espresso">Espresso</option>
+                  <option value="siphon">Siphon</option>
+                  <option value="cold_brew">Cold Brew</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="col-form-label" for="formGroupExampleInput2">Input Weight</label>
+                <input type="number" class="form-control" name="input_weight" placeholder="17.5" step="0.1">
+              </div>
+
+              <div class="form-group">
+                <label class="col-form-label" for="formGroupExampleInput2">Output Weight</label>
+                <input type="number" class="form-control" name="output_weight" placeholder="42.1" step="0.1">
+              </div>
+
+              <div class="form-group">
+                <label class="col-form-label" for="formGroupExampleInput2">Brew Time</label>
+                <input type="number" class="form-control" name="brew_time" placeholder="370">
+              </div>
+
+              <div class="form-group">
+                <label class="col-form-label" for="formGroupExampleInput2">Dry Smell</label>
+                <input type="text" class="form-control" name="dry_smell">
+              </div>
+
+              <div class="form-group">
+                <label class="col-form-label" for="formGroupExampleInput2">Grind Smell</label>
+                <input type="text" class="form-control" name="grind_smell">
+              </div>
+
+              <div class="form-group">
+                <label class="col-form-label" for="formGroupExampleInput2">Wet Smell</label>
+                <input type="text" class="form-control" name="wet_smell">
+              </div>
+
+              <div class="form-group">
+                <label class="col-form-label" for="formGroupExampleInput2">Tasting Notes</label>
+                <textarea class="form-control" name="tasting_notes" rows="5"></textarea>
+              </div>
+
+              <div class="modal-footer">
+                <input type="hidden" class="form-control" name="roast_id">
+                <input type="hidden" class="form-control" name="brew_id">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Add Brew</button>
+              </div>
+          </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="brewEditModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Edit Brew</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+
+          <form action="/brews/edit-brew" method="POST">
+            <div class="modal-body">
+              <div class="form-group">
+                <label class="col-form-label" for="formGroupExampleInput2">Roast</label>
+                {% if roasts|count > 0 %}
+                <select id="roasts" required>
+                  <option value="">Select roast</option>
+                  {% for item in roasts %}
+                  <option id="{{item.get('id')}}" origin="{{item.get('coffee')}}" max-weight="{{item.get('date')}}" value="{{item.get('id')}}">{{item.get('date')}} {{item.get('coffee')}} ({{item.get('input_weight')}})</option>
+                  {% endfor %}
+                </select>
+                {% endif %}
+              </div>
+
+              <div class="form-group">
+                <label class="col-form-label" for="formGroupExampleInput2">Brew Method</label>
+                <select id="brew_method" name="brew_method" required>
+                  <option value="pour_over">Pour-over</option>
+                  <option value="french_press">French Press</option>
+                  <option value="espresso">Espresso</option>
+                  <option value="siphon">Siphon</option>
+                  <option value="cold_brew">Cold Brew</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="col-form-label" for="formGroupExampleInput2">Input Weight</label>
+                <input type="number" class="form-control" name="input_weight" placeholder="17.5" step="0.1">
+              </div>
+
+              <div class="form-group">
+                <label class="col-form-label" for="formGroupExampleInput2">Output Weight</label>
+                <input type="number" class="form-control" name="output_weight" placeholder="42.1" step="0.1">
+              </div>
+
+              <div class="form-group">
+                <label class="col-form-label" for="formGroupExampleInput2">Brew Time</label>
+                <input type="number" class="form-control" name="brew_time" placeholder="370">
+              </div>
+
+              <div class="form-group">
+                <label class="col-form-label" for="formGroupExampleInput2">Dry Smell</label>
+                <input type="text" class="form-control" name="dry_smell">
+              </div>
+
+              <div class="form-group">
+                <label class="col-form-label" for="formGroupExampleInput2">Grind Smell</label>
+                <input type="text" class="form-control" name="grind_smell">
+              </div>
+
+              <div class="form-group">
+                <label class="col-form-label" for="formGroupExampleInput2">Wet Smell</label>
+                <input type="text" class="form-control" name="wet_smell">
+              </div>
+
+              <div class="form-group">
+                <label class="col-form-label" for="formGroupExampleInput2">Tasting Notes</label>
+                <textarea class="form-control" name="tasting_notes" rows="5"></textarea>
+              </div>
+
+              <div class="modal-footer">
+                <input type="hidden" class="form-control" name="roast_id">
+                <input type="hidden" class="form-control" name="brew_id">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save Brew</button>
+              </div>
+          </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <main role="main" class="col-md-12 pt-3">
+      <h1>Brews <span class="pull-right"><button class="btn btn-primary" type="button" data-toggle="modal" data-target="#brewModal">New Brew</button></h1>
+      <div id="error-container" class="alert alert-danger hidden" role="alert">
+        <span id="error-message"></span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="table-responsive">
+        {% if brews|count > 0 %}
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Roast</th>
+              <th>Date</th>
+              <th>Method</th>
+              <th>Input</th>
+              <th>Output</th>
+              <th>Time</th>
+              <th>Tasting Notes</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for item in brews %}
+            <tr id="{{item.get('id')}}" roast-id="{{item.get('roast_id')}}" coffee="{{item.get('coffee')}}" date="{{item.get('date')}}" duration="{{item.get('duration')}}">
+              <td><a href="/roast/{{item.get('roast_id')}}">{{item.get('coffee')}}</a></td>
+              <td>{{item.get('datetime')[0:10]}}</td>
+              <td>{{item.get('brew_method').title() | replace('_', ' ')}}</td>
+              <td>{{item.get('input_weight')}}</td>
+              <td>{{item.get('output_weight')}}</td>
+              <td>{{item.get('brew_time')}}</td>
+              <td>
+                <i class="fa fa-sticky-note-o" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="{{item.get('tasting_notes')}}"></i>
+                <span id="note-content">{{item.get('tasting_notes')}}</span>
+              </td>
+              <td>
+                <button type="button" class="btn btn-sm btn-primary edit-row">Edit</button>
+                <button type="button" class="btn btn-sm btn-danger delete-row">Delete</button>
+                <input type="hidden" class="form-control" name="dry_smell" value="{{item.get('dry_smell')}}">
+                <input type="hidden" class="form-control" name="grind_smell" value="{{item.get('grind_smell')}}">
+                <input type="hidden" class="form-control" name="wet_smell" value="{{item.get('wet_smell')}}">
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="card text-white bg-secondary">
+          <div class="card-body brew-card">
+            <h4 class="card-title">Save Your Notes</h4>
+            <p class="card-text">Every roast is going to produce slightly different flavors. Saving your brew notes makes it easy to recall what a specific coffee tasted like for each brew method.</p>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </main>
+  </div>
+{% endblock %}
+{% block bottom_import %}
+    {{ super() }}
+    <script type="text/javascript">
+      $('#roasts').change(function() {
+        var selection = $(this).val();
+        $('input[name="roast_id"]').val($('option:selected', this).attr('id'));
+      });
+
+      $(function () {
+          $('[data-toggle="tooltip"]').tooltip()
+      });
+
+      String.prototype.replaceAll = function(search, replacement) {
+          var target = this;
+          return target.replace(new RegExp(search, 'g'), replacement);
+      };
+
+      $('.delete-row').click(function(e) {
+        _this = this;
+        $.ajax({
+            url: '/brews/remove-item',
+            type: 'post',
+            dataType: 'json',
+            contentType:'application/json',
+            data: JSON.stringify({ id: $(this).closest('tr').attr('id')}),
+            success: function(data) {
+              if (data.success) {
+                $(_this).closest('tr').remove();
+              } else {
+                $('#error-message').text(data.error).show();
+                $('#error-container').show().removeClass('hidden');
+              }
+            }
+        });
+      });
+
+      $('.edit-row').click(function(e) {
+        var row = $(this).closest('tr');
+        var columns = row.find('td');
+        $('#brewEditModal').find('input[name="brew_id"]').val(row.attr('id'));
+        $('#brewEditModal').find('input[name="roast_id"]').val(row.attr('roast-id'));
+        $('#brewEditModal').find('#roasts').val(row.attr('roast-id'));
+        $('#brewEditModal').find('select[name="brew_method"]').val($(columns[2]).html().toLowerCase().replaceAll(' ', '_'));
+        $('#brewEditModal').find('input[name="input_weight"]').val($(columns[3]).html());
+        $('#brewEditModal').find('input[name="output_weight"]').val($(columns[4]).html());
+        $('#brewEditModal').find('input[name="brew_time"]').val($(columns[5]).html());
+        $('#brewEditModal').find('input[name="dry_smell"]').val($(columns[7]).find('input[name="dry_smell"]').val());
+        $('#brewEditModal').find('input[name="grind_smell"]').val($(columns[7]).find('input[name="grind_smell"]').val());
+        $('#brewEditModal').find('input[name="wet_smell"]').val($(columns[7]).find('input[name="wet_smell"]').val());
+        $('#brewEditModal').find('textarea[name="tasting_notes"]').val($(columns[6]).find('#note-content').text());
+        $('#brewEditModal').modal('show', true);
+      });
+    </script>
+{% endblock %}

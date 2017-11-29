@@ -25,6 +25,26 @@ def now_time(str=True):
     return datetime.datetime.now()
 
 
+def now_date(str=True):
+    """Get the current date and return it back to the app."""
+    import datetime
+    if str:
+        return datetime.date.datetime().strftime("%Y-%m-%d")
+    return datetime.datetime.now()
+
+
+def load_time(str_time):
+    """Convert the date string to a real datetime."""
+    import datetime
+    return datetime.datetime.strptime(str_time, "%Y-%m-%d %H:%M:%S")
+
+
+def load_date(str_time):
+    """Convert the date string to a real datetime."""
+    import datetime
+    return datetime.datetime.strptime(str_time, "%Y-%m-%d")
+
+
 def paranoid_clean(query_value):
     """Take a user query value and cleans.
 

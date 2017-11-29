@@ -88,3 +88,18 @@ class IntegrationTwitterbot(Form):
     tweet_roast_begin = BooleanField('tweet_roast_begin', default=False)
     tweet_roast_progress = BooleanField('tweet_roast_progress', default=False)
     tweet_roast_complete = BooleanField('tweet_roast_complete', default=False)
+
+
+class BrewForm(Form):
+
+    """Brew form validator."""
+
+    roast_id = StringField('roast_id', [validators.required()])
+    brew_method = StringField('brew_method', [validators.required()])
+    input_weight = StringField('input_weight', [validators.required()])
+    output_weight = StringField('output_weight', [validators.required()])
+    brew_time = StringField('brew_time', [validators.required()])
+    dry_smell = StringField('dry_smell', [validators.required()])
+    grind_smell = StringField('grind_smell', [validators.required()])
+    wet_smell = StringField('wet_smell', [validators.required()])
+    tasting_notes = StringField('tasting_notes', [validators.required()])
