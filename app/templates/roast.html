@@ -99,13 +99,13 @@
           <div id="heat-handle" class="ui-slider-handle"></div>
         </div>
 
-<!--         <h5 class="sidebar-header">Drum Motor</h5>
+        <h5 class="sidebar-header">Drum Motor</h5>
         <button id="drum-motor-btn" class="btn btn-sm toggle-control sec-control" type="button" action=""></button>
 
         <h5 class="sidebar-header">Stirring Motor</h5>
         <button id="cooling-motor-btn" class="btn btn-sm toggle-control sec-control" type="button" action=""></button>
 
-        <h5 class="sidebar-header">Drum Hatch</h5>
+<!--         <h5 class="sidebar-header">Drum Hatch</h5>
         <button id="solenoid-btn" class="btn btn-sm toggle-control sec-control margin-bottom-10" type="button" action=""></button> -->
       </div>
 
@@ -163,6 +163,14 @@
         <button class="btn btn-sm btn-primary margin-10 fc" type="button" action="true">First Crack</button>
         <button class="btn btn-sm btn-primary margin-10 sc" type="button" action="true">Second Crack</button>
         <button class="btn btn-sm btn-primary margin-10 drop" type="button" action="true">Drop</button>
+      </div>
+      <div id="cooldown-alert" class="alerts hidden">
+        <div class="alert alert-info alert-dismissible show" role="alert">
+          <strong>Cooldown Activated!</strong> Consider stopping the monitor now. When the beans are cooled, click shutdown to turn the roast off.
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
       </div>
     </main>
   </div>
@@ -233,10 +241,5 @@
             return false;
         });
       });
-
-      $('.reset').click(function() {
-        location.reload();
-      });
-
     </script>
 {% endblock %}

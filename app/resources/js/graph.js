@@ -177,6 +177,7 @@ $(document).ready(function () {
         },
         yAxis: {
             max: 110,
+            min: 0,
             gridLineColor: '#e5e5e5',
             title: {
                 text: 'Power'

@@ -33,7 +33,7 @@ def on_callback(data):
     Despite not being decorated, this function will still be able to send data
     back through socketio via the redis manager.
     """
-    logger.debug("User callback: %s" % str(data))
+    # logger.debug("User callback: %s" % str(data))
     sio.emit('state', data)
     return data
 

@@ -105,6 +105,12 @@ $(document).ready(function() {
             var id = "#" + key.replace('_', '-');
             if (key === 'environment_temp' || key === 'bean_temp') {
                 $(id).html(data.config[key].toFixed(2));
+            } else if (key === 'main_fan') {
+                $('#fan-handle').text(data.config[key]);
+                $("#fan-slider").slider("value", data.config[key]);
+            } else if (key === 'heater') {
+                $('#heat-handle').text(data.config[key]);
+                $("#heat-slider").slider("value", data.config[key]);
             } else {
                 $(id).html(data.config[key]);
             }
@@ -225,6 +231,20 @@ $(document).ready(function() {
         if (debug) { console.log("Drop Initiated"); }
         socket.emit('drop');
         $(this).prop("disabled", true);
+        $("#drum-motor-btn")
+        .removeClass('btn-success')
+        .addClass('btn-warning')
+        .attr('action', 'true')
+        .prop("disabled", true)
+        .html('Turn On');
+        $("#cooling-motor-btn")
+        .addClass('btn-success')
+        .removeClass('btn-warning')
+        .attr('action', 'true')
+        .prop("disabled", true)
+        .html('Turn Off');
+
+        $('#cooldown-alert').show();
     });
 
     $('.sec-control').click(function(e) {
@@ -242,5 +262,9 @@ $(document).ready(function() {
     $("#heat-slider" ).on("slide", function(event, ui) {
         socket.emit('heater', ui.value);
         $('#heat-handle').text(ui.value);
+    });
+
+    $('.reset').click(function() {
+        socket.emit('reset', properties);
     });
 });

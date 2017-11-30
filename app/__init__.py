@@ -14,7 +14,6 @@ from models.const import creatives
 from models.user import User
 # from pyhottop.pyhottop import Hottop
 from libs.hottop_thread import Hottop
-from libs.utils import timedelta2period
 import eventlet
 import logging
 import random

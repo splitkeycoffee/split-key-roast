@@ -1,3 +1,7 @@
+.alerts {
+    padding-left: 10px;
+}
+
 .cuppings {
     padding: 10px;
 }
@@ -134,11 +138,14 @@ td {
 }
 
 .hidden {
-    visibility: hidden;
     display: none;
 }
 
 #note-content {
     visibility: hidden;
     display: none;
+}
+
+.sub-row {
+    padding: 0 0 15px 15px;
 }

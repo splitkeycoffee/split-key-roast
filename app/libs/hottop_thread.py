@@ -194,6 +194,9 @@ class ControlProcess(Thread):
         self._log.debug("Validating the buffer")
         if len(buffer) == 0:
             self._log.debug("Buffer was empty")
+            if self._conn.isOpen():
+                self._log.debug('Closing connection')
+                self._conn.close()
             return False
         p0 = hex2int(buffer[0])
         p1 = hex2int(buffer[1])
@@ -216,25 +219,33 @@ class ControlProcess(Thread):
         :returns: dict
         """
         if not self._conn.isOpen():
+            self._log.debug("Reopening connection")
             self._conn.open()
         self._conn.flushInput()
         self._conn.flushOutput()
         buffer = self._conn.read(36)
+        if len(buffer) != 36:
+            self._log('Buffer length did not match 36')
+            if self._conn.isOpen():
+                self._log.debug('Closing connection')
+                self._conn.close()
+                self._read_settings(retry=True)
+
         check = self._validate_checksum(buffer)
-        if not check and (retry and self._retry_count < 3):
-            if self._retry_count > 3:
+        if not check and (retry and self._retry_count <= 3):
+            if self._retry_count == 3:
+                self._log.debug('Retry count reached on buffer check')
                 self._read_settings(retry=False)
             else:
+                self._retry_count += 1
                 self._read_settings(retry=True)
-            self._retry_count += 1
-            return False
 
         settings = dict()
         settings['heater'] = hex2int(buffer[10])
         settings['fan'] = hex2int(buffer[11])
         settings['main_fan'] = hex2int(buffer[12])
         et = hex2int(buffer[23] + buffer[24])
-        settings['external_temp'] = celsius2fahrenheit(et)
+        settings['environment_temp'] = celsius2fahrenheit(et)
         bt = hex2int(buffer[25] + buffer[26])
         settings['bean_temp'] = celsius2fahrenheit(bt)
         settings['solenoid'] = hex2int(buffer[16])
@@ -327,7 +338,7 @@ class Hottop:
     STOPBITS = 1
     TIMEOUT = 1
     LOG_LEVEL = logging.DEBUG
-    INTERVAL = 0.5
+    INTERVAL = 1
 
     def __init__(self):
         """Start of the hottop."""
@@ -428,7 +439,7 @@ class Hottop:
         self._config['solenoid'] = 0
         self._config['cooling_motor'] = 0
         self._config['interval'] = self.INTERVAL
-        self._config['external_temp'] = 0
+        self._config['environment_temp'] = 0
         self._config['bean_temp'] = 0
         self._config['chaff_tray'] = 1
 
