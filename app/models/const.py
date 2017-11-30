@@ -1,13 +1,5 @@
 """Common items used across the application."""
 creatives = {
-    'on_setup': [
-        'Looks like the roast is starting!',
-        'A new roast just started! Live updates to follow...',
-        'Let the coffee roasting begin!',
-        'Roasting monitors switched on!',
-        'Tune-in, drop-out and roast with us!',
-        'We\'re getting ready to begin a new roast!'
-    ],
     'on_start_monitor': [
         'Looks like the roast is starting!',
         'A new roast just started! Live updates to follow...',

@@ -47,15 +47,14 @@ def on_mock():
 
 
 @sio.on('roaster-setup')
-@tweet_hook
 def on_setup():
     """Establish a connection to the roaster via USB."""
-    # try:
-    #     ht.connect()
-    # except SerialConnectionError as e:
-    #     sio.emit('error', {'code': 'SERIAL_CONNECTION_ERROR',
-    #                        'message': str(e)})
-    #     return False
+    try:
+        ht.connect()
+    except SerialConnectionError as e:
+        sio.emit('error', {'code': 'SERIAL_CONNECTION_ERROR',
+                           'message': str(e)})
+        return False
     ht.start(on_callback)
     activity = {'activity': 'ROAST_START'}
     sio.emit('activity', activity)

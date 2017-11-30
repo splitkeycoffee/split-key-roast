@@ -12,13 +12,14 @@ from flask_pymongo import PyMongo
 from flask_socketio import SocketIO
 from models.const import creatives
 from models.user import User
-# from pyhottop.pyhottop import Hottop
-from libs.hottop_thread import Hottop
+from pyhottop.pyhottop import Hottop
+# from libs.hottop_thread import Hottop
 import eventlet
 import logging
 import random
 import socketio
 import sys
+import twitter
 
 mgr = socketio.RedisManager('redis://')
 sio = SocketIO(client_manager=mgr)
@@ -45,8 +46,8 @@ def tweet_hook(func):
         user = c.find_one({"username": current_user.get_id()})
         integrations = user.get('integrations')
 
-        twitter = integrations.get('twitter_bot')
-        if not twitter.get('status'):
+        bot = integrations.get('twitter_bot')
+        if not bot.get('status'):
             return results
 
         action = func.func_name
@@ -65,18 +66,27 @@ def tweet_hook(func):
             creative += " State: ET %d, BT %d, Time %s " % (
                 last['environment_temp'], last['bean_temp'],
                 results['state']['duration'])
+
         tags = 0
         tag_count = random.randint(2, 8)
         hashtags = creatives.get('hash_tags')
-        while len(creative) <= 160:
+        while len(creative) <= 140:
             if tags == tag_count:
                 break
-            creative += hashtags[random.randint(0, len(hashtags)-1)] + " "
+            hashtag = hashtags[random.randint(0, len(hashtags)-1)]
+            creative += hashtag + " "
+            hashtags.remove(hashtag)
             tags += 1
 
-        # Add in Tweet code here
-        logger.debug(creative)
-
+        # Tweeting code
+        api = twitter.Api(consumer_key=bot.get('consumer_key'),
+                          consumer_secret=bot.get('consumer_secret'),
+                          access_token_key=bot.get('access_token_key'),
+                          access_token_secret=bot.get('access_token_secret'))
+        try:
+            api.PostUpdate(creative)
+        except Exception as e:
+            logger.error(str(e))
         return results
     return wrapper
 
