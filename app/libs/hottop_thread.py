@@ -30,6 +30,7 @@ import logging
 import serial
 import sys
 import time
+from scipy.stats import linregress
 
 from .mock import MockProcess
 
@@ -41,6 +42,7 @@ else:
     from queue import Queue
 
 from threading import Thread, Event
+from collections import deque
 
 
 class InvalidInput(Exception):
@@ -380,6 +382,7 @@ class Hottop:
         self._roast_start = None
         self._roast_end = None
         self._config = dict()
+        self._window = deque(list(), 5)
         self._q = Queue()
         self._init_controls()
 
@@ -485,6 +488,8 @@ class Hottop:
         self._roast['events'] = list()
         self._roast['last'] = dict()
         self._roast['record'] = False
+        self._roast['charge'] = None
+        self._roast['turning_point'] = None
 
     def _callback(self, data):
         """Processor callback to clean-up stream data.
@@ -512,15 +517,68 @@ class Hottop:
             self._roast['duration'] = timedelta2period(ct - st)
 
         if self._roast['record']:
-            self._roast['events'].append(copy.deepcopy(output))
+            copied = copy.deepcopy(output)
+            self._derive_charge(copied['config'])
+            self._derive_turning_point(copied['config'])
+            self._roast['events'].append(copied)
             self._roast['last'] = local
 
         if self._user_callback:
             self._log.debug("Passing data back to client handler")
             output['roast'] = self._roast
             output['roasting'] = self._roasting
-            if local['valid']:
+            if local.get('valid', True):
                 self._user_callback(output)
+
+    def _derive_charge(self, config):
+        """Use a temperature window to identify the roast charge.
+
+        The charge will manifest as a sudden downward trend on the temperature.
+        Once found, we save it and avoid overwriting. The charge is needed in
+        order to derive the turning point.
+
+        :param config: Current snapshot of the configuration
+        :type config: dict
+        :returns: None
+        """
+        if self._roast.get('charge'):
+            return None
+        self._window.append(config)
+        time, temp = list(), list()
+        for x in list(self._window):
+            time.append(x['time'])
+            temp.append(x['bean_temp'])
+        slope, intercept, r_value, p_value, std_err = linregress(time, temp)
+        if slope < 0:
+            self._roast['charge'] = self._roast['last']
+            self.add_roast_event({'event': 'Charge'})
+            return config
+        return None
+
+    def _derive_turning_point(self, config):
+        """Use a temperature window to identify the roast turning point.
+
+        Turning point relies on the charge being set first. We use the rolling
+        5-point window to measure slope. If we show a positive trend after
+        the charge, then the temperature has begun to turn.
+
+        :param config: Current snapshot of the configuration
+        :type config: dict
+        :returns: None
+        """
+        if not self._roast.get('charge') or self._roast.get('turning_point'):
+            return None
+        self._window.append(config)
+        time, temp = list(), list()
+        for x in list(self._window):
+            time.append(x['time'])
+            temp.append(x['bean_temp'])
+        slope, intercept, r_value, p_value, std_err = linregress(time, temp)
+        if slope > 0:
+            self._roast['turning_point'] = self._roast['last']
+            self.add_roast_event({'event': 'Turning Point'})
+            return config
+        return None
 
     def start(self, func=None):
         """Start the roaster control process.
@@ -535,10 +593,10 @@ class Hottop:
         :returns: None
         """
         self._user_callback = func
-        self._process = ControlProcess(self._conn, self._config, self._q,
-                                       self._log, callback=self._callback)
-        # self._process = MockProcess(self._config, self._q,
-        #                             self._log, callback=self._callback)
+        # self._process = ControlProcess(self._conn, self._config, self._q,
+        #                                self._log, callback=self._callback)
+        self._process = MockProcess(self._config, self._q,
+                                    self._log, callback=self._callback)
         self._process.start()
         self._roasting = True
 

@@ -1,5 +1,7 @@
 socket = null;
 debug = true;
+plotCharge = false;
+plotTurningPoint = false;
 
 function initToggleControl(id, state) {
     if (state === 'false') {
@@ -105,12 +107,6 @@ $(document).ready(function() {
             var id = "#" + key.replace('_', '-');
             if (key === 'environment_temp' || key === 'bean_temp') {
                 $(id).html(data.config[key].toFixed(2));
-            // } else if (key === 'main_fan') {
-            //     $('#fan-handle').text(data.config[key]);
-            //     $("#fan-slider").slider("value", data.config[key]);
-            // } else if (key === 'heater') {
-            //     $('#heat-handle').text(data.config[key]);
-            //     $("#heat-slider").slider("value", data.config[key]);
             } else {
                 $(id).html(data.config[key]);
             }
@@ -118,6 +114,24 @@ $(document).ready(function() {
 
         if (!data.roast.record) {
             return false;
+        }
+
+        if (data.roast.charge && !plotCharge) {
+            mainChart.series[2].addPoint({
+                x: data.roast.charge.time,
+                title: 'C (' + data.roast.charge.bean_temp.toFixed(0) + ")",
+                text: "Charge"
+            });
+            plotCharge = true;
+        }
+
+        if (data.roast.turning_point && !plotTurningPoint) {
+            mainChart.series[2].addPoint({
+                x: data.roast.turning_point.time,
+                title: 'TP (' + data.roast.turning_point.bean_temp.toFixed(0) + ")",
+                text: "Turning Point"
+            });
+            plotTurningPoint = true;
         }
 
         mainChart.series[0].addPoint([data.time, data.config.environment_temp]);
@@ -159,19 +173,19 @@ $(document).ready(function() {
         } else if (data.activity === "FIRST_CRACK") {
             mainChart.series[2].addPoint({
                 x: data.state.last.time,
-                title: 'FC (' + data.state.last.environment_temp.toFixed(0) + ", " + data.state.last.bean_temp.toFixed(0) + ")",
+                title: 'FC (' + data.state.last.bean_temp.toFixed(0) + ")",
                 text: "First Crack"
             });
         } else if (data.activity === "SECOND_CRACK") {
             mainChart.series[2].addPoint({
                 x: data.state.last.time,
-                title: 'SC (' + data.state.last.environment_temp.toFixed(0) + ", " + data.state.last.bean_temp.toFixed(0) + ")",
+                title: 'SC (' + data.state.last.bean_temp.toFixed(0) + ")",
                 text: "Second Crack"
             });
         } else if (data.activity === "DROP_COFFEE") {
             mainChart.series[2].addPoint({
                 x: data.state.last.time,
-                title: 'Drop (' + data.state.last.environment_temp.toFixed(0) + ", " + data.state.last.bean_temp.toFixed(0) + ")",
+                title: 'D (' + data.state.last.bean_temp.toFixed(0) + ")",
                 text: "Dropped"
             });
         } else if (data.activity === "START_MONITOR") {
