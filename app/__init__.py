@@ -12,8 +12,8 @@ from flask_pymongo import PyMongo
 from flask_socketio import SocketIO
 from models.const import creatives
 from models.user import User
-from pyhottop.pyhottop import Hottop
-# from libs.hottop_thread import Hottop
+# from pyhottop.pyhottop import Hottop
+from libs.hottop_thread import Hottop
 import eventlet
 import logging
 import random
@@ -52,25 +52,33 @@ def tweet_hook(func):
 
         action = func.func_name
         base = creatives.get(func.func_name)
-        creative = base[random.randint(0, len(base)-1)]
-        if action == 'on_start_monitor':
+        creative = None
+        if action == 'on_start_monitor' and bot.get('tweet_roast_begin'):
             state = results['state']
+            creative = base[random.randint(0, len(base)-1)]
             creative += " %s grams of %s " % (
                 state['input_weight'], state['coffee'])
-        if action == 'on_stop_monitor':
+        if action == 'on_stop_monitor' and bot.get('tweet_roast_complete'):
             state = results['state']
+            creative = base[random.randint(0, len(base)-1)]
             creative += " Total time: %s " % (state['duration'])
-        if action in ['on_first_crack', 'on_second_crack', 'on_drop']:
+        if (action in ['on_first_crack', 'on_second_crack', 'on_drop']) \
+                and (bot.get('tweet_roast_progress')):
             state = results['state']
             last = state['last']
+            creative = base[random.randint(0, len(base)-1)]
             creative += " State: ET %d, BT %d, Time %s " % (
                 last['environment_temp'], last['bean_temp'],
                 results['state']['duration'])
 
+        if creative:
+            # Didn't trigger any of the actions or they weren't enabled
+            return results
+
         tags = 0
         tag_count = random.randint(2, 8)
         hashtags = creatives.get('hash_tags')
-        while len(creative) <= 140:
+        while len(creative) <= 120:
             if tags == tag_count:
                 break
             hashtag = hashtags[random.randint(0, len(hashtags)-1)]

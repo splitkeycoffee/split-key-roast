@@ -105,12 +105,12 @@ $(document).ready(function() {
             var id = "#" + key.replace('_', '-');
             if (key === 'environment_temp' || key === 'bean_temp') {
                 $(id).html(data.config[key].toFixed(2));
-            } else if (key === 'main_fan') {
-                $('#fan-handle').text(data.config[key]);
-                $("#fan-slider").slider("value", data.config[key]);
-            } else if (key === 'heater') {
-                $('#heat-handle').text(data.config[key]);
-                $("#heat-slider").slider("value", data.config[key]);
+            // } else if (key === 'main_fan') {
+            //     $('#fan-handle').text(data.config[key]);
+            //     $("#fan-slider").slider("value", data.config[key]);
+            // } else if (key === 'heater') {
+            //     $('#heat-handle').text(data.config[key]);
+            //     $("#heat-slider").slider("value", data.config[key]);
             } else {
                 $(id).html(data.config[key]);
             }

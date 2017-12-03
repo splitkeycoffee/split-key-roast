@@ -102,13 +102,13 @@ $(document).ready(function () {
                 linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
                 stops: [
                     [0, '#ffffff'],
-                    [.150, '#ffffff'],
-                    [.151, '#efe8e0'],
-                    [.304, '#efe8e0'],
-                    [.305, '#fef1da'],
-                    [.509, '#fef1da'],
-                    [.510, '#d9ebd9'],
-                    [.730, '#d9ebd9'],
+                    [.254, '#ffffff'],
+                    [.255, '#efe8e0'],
+                    [.394, '#efe8e0'],
+                    [.395, '#fef1da'],
+                    [.529, '#fef1da'],
+                    [.530, '#d9ebd9'],
+                    [.750, '#d9ebd9'],
                     [.100, '#ffffff']
                 ]
             },
@@ -154,11 +154,13 @@ $(document).ready(function () {
             data: [],
             id: 'bt'
         }, {
+            name: 'Events',
             type: 'flags',
             shape: 'squarepin',
             data: [],
             onSeries: 'bt',
-            yAxis: 0
+            yAxis: 0,
+            id: 'events'
         }]
     });
 

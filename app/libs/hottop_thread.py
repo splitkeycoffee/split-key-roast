@@ -125,6 +125,9 @@ class ControlProcess(Thread):
     :returns: ControlProces instance
     """
 
+    MAX_BOUND_TEMP = 500
+    MIN_BOUND_TEMP = 100
+
     def __init__(self, conn, config, q, logger, callback=None):
         """Extend threads to support more control logic."""
         Thread.__init__(self)
@@ -162,6 +165,9 @@ class ControlProcess(Thread):
         config[12] = self._config.get('main_fan', 0)
         config[16] = self._config.get('solenoid', 0)
         config[17] = self._config.get('drum_motor', 0)
+        if self._config.get('heater', 0) > 0:
+            # Override the user here since the drum MUST be on for heat
+            config[17] = 1
         config[18] = self._config.get('cooling_motor', 0)
         config[35] = sum([b for b in config[:35]]) & 0xFF
         return bytes(config)
@@ -225,16 +231,16 @@ class ControlProcess(Thread):
         self._conn.flushOutput()
         buffer = self._conn.read(36)
         if len(buffer) != 36:
-            self._log('Buffer length did not match 36')
+            self._log.debug('Buffer length did not match 36')
             if self._conn.isOpen():
                 self._log.debug('Closing connection')
                 self._conn.close()
                 self._read_settings(retry=True)
 
         check = self._validate_checksum(buffer)
-        if not check and (retry and self._retry_count <= 3):
-            if self._retry_count == 3:
-                self._log.debug('Retry count reached on buffer check')
+        if not check and (retry and self._retry_count <= 10):
+            if self._retry_count == 10:
+                self._log.error('Retry count reached on buffer check')
                 self._read_settings(retry=False)
             else:
                 self._retry_count += 1
@@ -252,8 +258,31 @@ class ControlProcess(Thread):
         settings['drum_motor'] = hex2int(buffer[17])
         settings['cooling_motor'] = hex2int(buffer[18])
         settings['chaff_tray'] = hex2int(buffer[19])
+        settings['buffer'] = buffer
         self._retry_count = 0
         return settings
+
+    def _valid_config(self, settings):
+        """Scan through the returned settings to ensure they appear sane.
+
+        There are time when the returned buffer has the proper information, but
+        the reading is inaccurate. When this happens, temperatures will swing
+        or system values will be set to improper values.
+
+        :param settings: Configuration derived from the buffer
+        :type settings: dict
+        :returns: bool
+        """
+        if ((int(settings['environment_temp']) > self.MAX_BOUND_TEMP or
+                int(settings['environment_temp']) < self.MIN_BOUND_TEMP) or
+            (int(settings['bean_temp']) > self.MAX_BOUND_TEMP or
+                int(settings['bean_temp']) < self.MIN_BOUND_TEMP)):
+            return False
+        binary = ['drum_motor', 'chaff_tray', 'solenoid', 'cooling_motor']
+        for item in binary:
+            if int(settings.get(item)) not in [0, 1]:
+                return False
+        return True
 
     def _wake_up(self):
         """Wake the machine up to avoid race conditions.
@@ -293,17 +322,19 @@ class ControlProcess(Thread):
 
         while not self.exit.is_set():
             settings = self._read_settings()
+            settings['valid'] = self._valid_config(settings)
             self._cb(settings)
 
             if self.cooldown.is_set():
                 self._log.debug("Cool down process triggered")
-                self._config['drum_motor'] = 0
+                self._config['drum_motor'] = 1
                 self._config['heater'] = 0
                 self._config['solenoid'] = 1
                 self._config['cooling_motor'] = 1
                 self._config['main_fan'] = 10
 
-            self._send_config()
+            if settings['valid']:
+                self._send_config()
             time.sleep(self._config['interval'])
 
     def drop(self):
@@ -338,7 +369,7 @@ class Hottop:
     STOPBITS = 1
     TIMEOUT = 1
     LOG_LEVEL = logging.DEBUG
-    INTERVAL = 1
+    INTERVAL = 0.6
 
     def __init__(self):
         """Start of the hottop."""
@@ -488,7 +519,8 @@ class Hottop:
             self._log.debug("Passing data back to client handler")
             output['roast'] = self._roast
             output['roasting'] = self._roasting
-            self._user_callback(output)
+            if local['valid']:
+                self._user_callback(output)
 
     def start(self, func=None):
         """Start the roaster control process.
@@ -503,10 +535,10 @@ class Hottop:
         :returns: None
         """
         self._user_callback = func
-        # self._process = ControlProcess(self._conn, self._config, self._q,
-        #                                self._log, callback=self._callback)
-        self._process = MockProcess(self._config, self._q,
-                                    self._log, callback=self._callback)
+        self._process = ControlProcess(self._conn, self._config, self._q,
+                                       self._log, callback=self._callback)
+        # self._process = MockProcess(self._config, self._q,
+        #                             self._log, callback=self._callback)
         self._process.start()
         self._roasting = True
 
