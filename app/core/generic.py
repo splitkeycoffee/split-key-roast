@@ -1,6 +1,6 @@
 """Generic calls within the application."""
 from . import core
-from .. import mongo
+from .. import mongo, logger
 from ..libs.utils import paranoid_clean
 from .forms import AccountSettingsForm, ChangePasswordForm
 from bson.objectid import ObjectId
@@ -104,7 +104,7 @@ def export_roast():
     if not item:
         return jsonify({'success': False, 'message': 'No such roast.'})
     content = json.dumps(item, indent=4, sort_keys=True)
-    coffee = item['coffee'].replace(' ', '-')
+    coffee = item['coffee'].replace(',', ' ').replace(' ', '-')
     f = "{0}-{1}-{2}.log".format(item['date'], coffee, roast_id)
     headers = {'Content-Disposition': 'attachment;filename=%s' % f}
     return Response(content, mimetype='application/json', headers=headers)

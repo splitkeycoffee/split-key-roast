@@ -257,7 +257,10 @@ $(document).ready(function() {
         .attr('action', 'true')
         .prop("disabled", true)
         .html('Turn Off');
-
+        $("#heat-slider").slider("value", 0);
+        $('#heat-handle').text(0);
+        $("#fan-slider").slider("value", 10);
+        $('#fan-handle').text(10);
         $('#cooldown-alert').show();
     });
 

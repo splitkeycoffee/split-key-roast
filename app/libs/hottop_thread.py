@@ -128,7 +128,7 @@ class ControlProcess(Thread):
     """
 
     MAX_BOUND_TEMP = 500
-    MIN_BOUND_TEMP = 100
+    MIN_BOUND_TEMP = 50
 
     def __init__(self, conn, config, q, logger, callback=None):
         """Extend threads to support more control logic."""
@@ -233,35 +233,38 @@ class ControlProcess(Thread):
         self._conn.flushOutput()
         buffer = self._conn.read(36)
         if len(buffer) != 36:
-            self._log.debug('Buffer length did not match 36')
+            self._log.debug('Buffer length (%d) did not match 36' % len(buffer))
             if self._conn.isOpen():
                 self._log.debug('Closing connection')
                 self._conn.close()
                 self._read_settings(retry=True)
 
         check = self._validate_checksum(buffer)
-        if not check and (retry and self._retry_count <= 10):
-            if self._retry_count == 10:
+        if not check and (retry and self._retry_count <= 3):
+            if self._retry_count == 3:
                 self._log.error('Retry count reached on buffer check')
                 self._read_settings(retry=False)
             else:
                 self._retry_count += 1
                 self._read_settings(retry=True)
 
-        settings = dict()
-        settings['heater'] = hex2int(buffer[10])
-        settings['fan'] = hex2int(buffer[11])
-        settings['main_fan'] = hex2int(buffer[12])
-        et = hex2int(buffer[23] + buffer[24])
-        settings['environment_temp'] = celsius2fahrenheit(et)
-        bt = hex2int(buffer[25] + buffer[26])
-        settings['bean_temp'] = celsius2fahrenheit(bt)
-        settings['solenoid'] = hex2int(buffer[16])
-        settings['drum_motor'] = hex2int(buffer[17])
-        settings['cooling_motor'] = hex2int(buffer[18])
-        settings['chaff_tray'] = hex2int(buffer[19])
-        settings['buffer'] = buffer
-        self._retry_count = 0
+        try:
+            settings = dict()
+            settings['heater'] = hex2int(buffer[10])
+            settings['fan'] = hex2int(buffer[11])
+            settings['main_fan'] = hex2int(buffer[12])
+            et = hex2int(buffer[23] + buffer[24])
+            settings['environment_temp'] = celsius2fahrenheit(et)
+            bt = hex2int(buffer[25] + buffer[26])
+            settings['bean_temp'] = celsius2fahrenheit(bt)
+            settings['solenoid'] = hex2int(buffer[16])
+            settings['drum_motor'] = hex2int(buffer[17])
+            settings['cooling_motor'] = hex2int(buffer[18])
+            settings['chaff_tray'] = hex2int(buffer[19])
+            self._retry_count = 0
+        except Exception as e:
+            self._log.error("Pulled a cache configuration!")
+            settings = self._generate_config()
         return settings
 
     def _valid_config(self, settings):
@@ -279,10 +282,12 @@ class ControlProcess(Thread):
                 int(settings['environment_temp']) < self.MIN_BOUND_TEMP) or
             (int(settings['bean_temp']) > self.MAX_BOUND_TEMP or
                 int(settings['bean_temp']) < self.MIN_BOUND_TEMP)):
+            self._log.error('Temperatures are outside of bounds')
             return False
         binary = ['drum_motor', 'chaff_tray', 'solenoid', 'cooling_motor']
         for item in binary:
             if int(settings.get(item)) not in [0, 1]:
+                self._log.error('Settings show invalid values')
                 return False
         return True
 
@@ -336,6 +341,7 @@ class ControlProcess(Thread):
                 self._config['main_fan'] = 10
 
             if settings['valid']:
+                self._log.debug("Settings were valid, sending...")
                 self._send_config()
             time.sleep(self._config['interval'])
 
@@ -592,11 +598,12 @@ class Hottop:
         :type func: function
         :returns: None
         """
+        self.reset()  # Accounts for anything left behind
         self._user_callback = func
-        # self._process = ControlProcess(self._conn, self._config, self._q,
-        #                                self._log, callback=self._callback)
-        self._process = MockProcess(self._config, self._q,
-                                    self._log, callback=self._callback)
+        self._process = ControlProcess(self._conn, self._config, self._q,
+                                       self._log, callback=self._callback)
+        # self._process = MockProcess(self._config, self._q,
+        #                             self._log, callback=self._callback)
         self._process.start()
         self._roasting = True
 
@@ -639,6 +646,7 @@ class Hottop:
         self._roast_start = None
         self._roast_end = None
         self._roast = dict()
+        self._window = deque(list(), 5)
         self._init_controls()
 
     def add_roast_event(self, event):

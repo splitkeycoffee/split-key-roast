@@ -42,6 +42,8 @@ def historic_roast(roast_id):
                                      int(p['config']['bean_temp']))
             derived['flags'].append({'x': p['time'], 'title': str(label)})
             continue
+        if not p['config'].get('valid', True):
+            continue
         derived['s1'].append([p['time'], p['config']['environment_temp']])
         derived['s2'].append([p['time'], p['config']['bean_temp']])
         derived['s3'].append([p['time'], p['config']['main_fan'] * 10])
