@@ -475,7 +475,7 @@ class Hottop:
         self._config['heater'] = 0
         self._config['fan'] = 0
         self._config['main_fan'] = 0
-        self._config['drum_motor'] = 0
+        self._config['drum_motor'] = 1
         self._config['solenoid'] = 0
         self._config['cooling_motor'] = 0
         self._config['interval'] = self.INTERVAL

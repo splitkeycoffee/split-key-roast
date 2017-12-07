@@ -103,6 +103,12 @@ def export_roast():
     item = c.find_one({'_id': ObjectId(roast_id)}, {'_id': 0})
     if not item:
         return jsonify({'success': False, 'message': 'No such roast.'})
+    cleaned = list()
+    for i in item.get('events', list()):
+        if not i.get('config', dict()).get('valid'):
+            continue
+        cleaned.append(i)
+    item['events'] = cleaned
     content = json.dumps(item, indent=4, sort_keys=True)
     coffee = item['coffee'].replace(',', ' ').replace(' ', '-')
     f = "{0}-{1}-{2}.log".format(item['date'], coffee, roast_id)
