@@ -102,7 +102,7 @@ def on_stop_monitor():
 def on_drop():
     """Drop the coffee and begin the cool-down."""
     ht.drop()
-    state = ht.add_roast_event({'event': 'Drop Coffee'})
+    state = ht.add_roast_event({'event': 'Drop'})
     activity = {'activity': 'DROP_COFFEE', 'state': state}
     sio.emit('activity', activity)
     return activity

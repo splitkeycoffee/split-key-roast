@@ -17,6 +17,7 @@ from . import (
     integrations,
     inventory,
     profiles,
-    roast,
-    user
+    roast
 )
+
+from ..models import user
