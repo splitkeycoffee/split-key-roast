@@ -78,7 +78,7 @@ def tweet_hook(func):
         tags = 0
         tag_count = random.randint(2, 8)
         hashtags = creatives.get('hash_tags')
-        while len(creative) <= 120:
+        while len(creative) <= 200:
             if tags == tag_count:
                 break
             hashtag = hashtags[random.randint(0, len(hashtags)-1)]
