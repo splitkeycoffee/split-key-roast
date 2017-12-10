@@ -140,10 +140,10 @@ def on_second_crack():
 
 
 @sio.on('roast-properties')
-# @tweet_hook
 def on_roast_properties(state):
     """Update the roast properties."""
     logger.debug("Roast Properties: %s" % state)
+    ht.reset()
     ht.set_roast_properties(state)
     activity = {'activity': 'ROAST_PROPERTIES', 'state': state}
     sio.emit('activity', activity)

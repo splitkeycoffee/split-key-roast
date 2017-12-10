@@ -598,12 +598,11 @@ class Hottop:
         :type func: function
         :returns: None
         """
-        self.reset()  # Accounts for anything left behind
         self._user_callback = func
-        self._process = ControlProcess(self._conn, self._config, self._q,
-                                       self._log, callback=self._callback)
-        # self._process = MockProcess(self._config, self._q,
-        #                             self._log, callback=self._callback)
+        # self._process = ControlProcess(self._conn, self._config, self._q,
+        #                                self._log, callback=self._callback)
+        self._process = MockProcess(self._config, self._q,
+                                    self._log, callback=self._callback)
         self._process.start()
         self._roasting = True
 
