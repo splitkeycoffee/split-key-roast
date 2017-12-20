@@ -14,6 +14,7 @@ from models.const import creatives
 from models.user import User
 # from pyhottop.pyhottop import Hottop
 from libs.hottop_thread import Hottop
+import copy
 import eventlet
 import logging
 import random
@@ -50,8 +51,9 @@ def tweet_hook(func):
         if not bot.get('status'):
             return results
 
+        creative_ref = copy.deepcopy(creatives)
         action = func.func_name
-        base = creatives.get(func.func_name)
+        base = creative_ref.get(func.func_name)
         creative = None
         if action == 'on_start_monitor' and bot.get('tweet_roast_begin'):
             state = results['state']
@@ -77,8 +79,8 @@ def tweet_hook(func):
 
         tags = 0
         tag_count = random.randint(2, 8)
-        hashtags = creatives.get('hash_tags')
-        while len(creative) <= 200:
+        hashtags = creative_ref.get('hash_tags')
+        while len(creative) <= 140:
             if tags == tag_count:
                 break
             hashtag = hashtags[random.randint(0, len(hashtags)-1)]

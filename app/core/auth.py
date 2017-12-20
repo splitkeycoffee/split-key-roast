@@ -39,10 +39,25 @@ def register():
     form = RegisterForm(request.form)
     if request.method == 'POST' and form.validate():
         c = mongo.db[app.config['USERS_COLLECTION']]
-        user = {"username": form.username.data, "email": form.email.data,
-                "first_name": form.first_name.data,
-                "last_name": form.last_name.data,
-                'password': generate_password_hash(form.password.data)}
+        user = {
+            "username": form.username.data,
+            "email": form.email.data,
+            "first_name": form.first_name.data,
+            "last_name": form.last_name.data,
+            'password': generate_password_hash(form.password.data),
+            'integrations': {
+                'twitter_bot': {
+                    'status': False,
+                    'tweet_roast_begin': False,
+                    'tweet_roast_progress': False,
+                    'tweet_roast_complete': False,
+                    'consumer_key': '',
+                    'consumer_secret': '',
+                    'access_token_key': '',
+                    'access_token_secret': ''
+                }
+            }
+        }
         logger.debug("User: %s" % user)
         _id = c.insert(user)
         next = request.args.get('next')
