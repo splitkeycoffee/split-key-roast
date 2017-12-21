@@ -12,8 +12,8 @@ from flask_pymongo import PyMongo
 from flask_socketio import SocketIO
 from models.const import creatives
 from models.user import User
-# from pyhottop.pyhottop import Hottop
-from libs.hottop_thread import Hottop
+from pyhottop.pyhottop import Hottop
+# from libs.hottop_thread import Hottop
 import copy
 import eventlet
 import logging

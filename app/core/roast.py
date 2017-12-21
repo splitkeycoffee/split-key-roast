@@ -1,10 +1,10 @@
 """Calls related to roasting."""
 from . import core
-from .. import mongo
-from ..libs.utils import paranoid_clean
+from .. import logger, mongo
+from ..libs.utils import paranoid_clean, now_time
 from bson.objectid import ObjectId
 from flask import current_app as app
-from flask import render_template, jsonify
+from flask import render_template, jsonify, request
 from flask_login import login_required, current_user
 
 
@@ -73,3 +73,40 @@ def historic_roast(roast_id):
     return render_template('historic_roast.html', roast=item,
                            inventory=inventory, derived=derived,
                            cuppings=cuppings, brews=brews)
+
+
+@core.route('/roast/update-properties', methods=['POST'])
+@login_required
+def update_properties():
+    """Render the index page."""
+    state = request.get_json()
+    if 'id' not in state:
+        return jsonify({'success': False,
+                        'error': 'ID not found in request!'})
+    logger.debug("Updated Roast Properties: %s" % state)
+    c = mongo.db[app.config['HISTORY_COLLECTION']]
+    roast_id = paranoid_clean(state.get('id'))
+    item = c.find_one({'_id': ObjectId(roast_id)}, {'_id': 0})
+    if not item:
+        return jsonify({'success': False, 'message': 'No such roast.'})
+    item = {'notes': state.get('notes'),
+            'input_weight': state.get('input_weight'),
+            'output_weight': state.get('output_weight')}
+    c.update({'_id': ObjectId(roast_id)}, {'$set': item})
+    return jsonify({'success': True})
+
+
+@core.route('/roast/save-profile', methods=['POST'])
+@login_required
+def save_profile():
+    """Render the index page."""
+    state = request.get_json()
+    logger.debug("Roast Profile: %s" % state)
+    c = mongo.db[app.config['PROFILE_COLLECTION']]
+    item = {'coffee': state.get('coffee'), 'roast': state.get('roast'),
+            'drop_temp': state.get('drop_temp'),
+            'brew_methods': state.get('brew_methods'),
+            'notes': state.get('notes'), 'datetime': now_time(),
+            'user': current_user.get_id()}
+    _id = c.insert(item)
+    return jsonify({'success': True})

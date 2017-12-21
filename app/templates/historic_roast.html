@@ -203,7 +203,6 @@
     <script src="/resources/external/highcharts/modules/offline-exporting.js"></script>
 
     <script src="/resources/js/graph.js"></script>
-    <script src="/resources/js/hottop.js"></script>
 
     <script type="text/javascript">
     $(document).ready(function () {
@@ -254,7 +253,19 @@
       $('#sidebar-note').html($('#roast-notes').val());
       $('#sidebar-input-weight').html($('#input-weight').val());
       $('#sidebar-output-weight').html($('#output-weight').val());
-      socket.emit('update-roast-properties', properties);
+
+      $.ajax({
+          url: '/roast/update-properties',
+          type: 'post',
+          dataType: 'json',
+          contentType:'application/json',
+          data: JSON.stringify(properties),
+          success: function(data) {
+            if (data.success) {
+              console.log("Done");
+            }
+          }
+      });
     });
 
     $('#roast-profile-form').bind("submit", function(e) {
@@ -272,7 +283,19 @@
         notes: $('#profile-notes').val()
       }
       $('#addRoastProfile').modal('hide');
-      socket.emit('save-profile', properties);
+
+      $.ajax({
+          url: '/roast/save-profile',
+          type: 'post',
+          dataType: 'json',
+          contentType:'application/json',
+          data: JSON.stringify(properties),
+          success: function(data) {
+            if (data.success) {
+              console.log("Done");
+            }
+          }
+      });
     });
 
     </script>

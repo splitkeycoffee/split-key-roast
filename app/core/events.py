@@ -150,38 +150,6 @@ def on_roast_properties(state):
     return activity
 
 
-@sio.on('update-roast-properties')
-def on_update_roast_properties(state):
-    """Update the roast properties."""
-    # TODO: Revisit if this is needed as a websocket call
-    logger.debug("Updated Roast Properties: %s" % state)
-    c = mongo.db[app.config['HISTORY_COLLECTION']]
-    roast_id = paranoid_clean(state.get('id'))
-    item = c.find_one({'_id': ObjectId(roast_id)}, {'_id': 0})
-    if not item:
-        return jsonify({'success': False, 'message': 'No such roast.'})
-    item = {'notes': state.get('notes'),
-            'input_weight': state.get('input_weight'),
-            'output_weight': state.get('output_weight')}
-    c.update({'_id': ObjectId(roast_id)}, {'$set': item})
-    return jsonify({'success': True})
-
-
-@sio.on('save-profile')
-def on_save_profile(state):
-    """Save the roast profile."""
-    # TODO: Revisit if this is needed as a websocket call
-    logger.debug("Roast Profile: %s" % state)
-    c = mongo.db[app.config['PROFILE_COLLECTION']]
-    item = {'coffee': state.get('coffee'), 'roast': state.get('roast'),
-            'drop_temp': state.get('drop_temp'),
-            'brew_methods': state.get('brew_methods'),
-            'notes': state.get('notes'), 'datetime': now_time(),
-            'user': current_user.get_id()}
-    _id = c.insert(item)
-    return jsonify({'success': True})
-
-
 @sio.on('drum-motor')
 def on_drum_motor(state):
     """Toggle the drum motor control."""
