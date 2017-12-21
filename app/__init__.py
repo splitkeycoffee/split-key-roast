@@ -40,7 +40,7 @@ eventlet.monkey_patch()
 
 
 def tweet_hook(func):
-    """Decorator to run tweets if the integration is enabled."""
+    """Decorate to run tweets if the integration is enabled."""
     def wrapper(*args, **kwargs):
         results = func(*args, **kwargs)
         c = mongo.db[app.config['USERS_COLLECTION']]
@@ -57,18 +57,18 @@ def tweet_hook(func):
         creative = None
         if action == 'on_start_monitor' and bot.get('tweet_roast_begin'):
             state = results['state']
-            creative = base[random.randint(0, len(base)-1)]
+            creative = base[random.randint(0, len(base) - 1)]
             creative += " %s grams of %s " % (
                 state['input_weight'], state['coffee'])
         if action == 'on_stop_monitor' and bot.get('tweet_roast_complete'):
             state = results['state']
-            creative = base[random.randint(0, len(base)-1)]
+            creative = base[random.randint(0, len(base) - 1)]
             creative += " Total time: %s " % (state['duration'])
         if (action in ['on_first_crack', 'on_second_crack', 'on_drop']) \
                 and (bot.get('tweet_roast_progress')):
             state = results['state']
             last = state['last']
-            creative = base[random.randint(0, len(base)-1)]
+            creative = base[random.randint(0, len(base) - 1)]
             creative += " State: ET %d, BT %d, Time %s " % (
                 last['environment_temp'], last['bean_temp'],
                 results['state']['duration'])
@@ -83,7 +83,7 @@ def tweet_hook(func):
         while len(creative) <= 140:
             if tags == tag_count:
                 break
-            hashtag = hashtags[random.randint(0, len(hashtags)-1)]
+            hashtag = hashtags[random.randint(0, len(hashtags) - 1)]
             creative += hashtag + " "
             hashtags.remove(hashtag)
             tags += 1
@@ -123,7 +123,7 @@ def unauthorized():
     return redirect(url_for('core.login'))
 
 
-def create_app(debug=False):
+def create_app(debug=False, simulate=False):
     """Create an application context with blueprints."""
     app = Flask(__name__, static_folder='./resources')
     app.config['SECRET_KEY'] = 'iqR2cYJp93PuuO8VbK1Z'
@@ -133,11 +133,15 @@ def create_app(debug=False):
     app.config['INVENTORY_COLLECTION'] = 'inventory'
     app.config['PROFILE_COLLECTION'] = 'profiles'
     app.config['USERS_COLLECTION'] = 'accounts'
+    app.config['SIMULATE_ROAST'] = simulate
     login_manager.init_app(app)
     mongo.init_app(app)
     sio.init_app(app)
 
     from .core import core as core_blueprint
     app.register_blueprint(core_blueprint)
+
+    if simulate:
+        ht.set_simulate(True)
 
     return app

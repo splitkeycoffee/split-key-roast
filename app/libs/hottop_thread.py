@@ -382,6 +382,7 @@ class Hottop:
     def __init__(self):
         """Start of the hottop."""
         self._log = self._logger()
+        self._simulate = False
         self._conn = None
         self._roast = dict()
         self._roasting = False
@@ -446,6 +447,8 @@ class Hottop:
         :returns: bool
         :raises SerialConnectionError:
         """
+        if self._simulate:
+            return True
         if not interface:
             match = self._autodiscover_usb()
             self._log.debug("Auto-discovered USB port: %s" % match)
@@ -599,10 +602,12 @@ class Hottop:
         :returns: None
         """
         self._user_callback = func
-        self._process = ControlProcess(self._conn, self._config, self._q,
-                                       self._log, callback=self._callback)
-        # self._process = MockProcess(self._config, self._q,
-        #                             self._log, callback=self._callback)
+        if not self._simulate:
+            self._process = ControlProcess(self._conn, self._config, self._q,
+                                           self._log, callback=self._callback)
+        else:
+            self._process = MockProcess(self._config, self._q,
+                                        self._log, callback=self._callback)
         self._process.start()
         self._roasting = True
 
@@ -893,3 +898,23 @@ class Hottop:
             raise InvalidInput("Cooling motor value must be bool")
         self._config['cooling_motor'] = bool2int(cooling_motor)
         self._q.put(self._config)
+
+
+    def get_simulate(self):
+        """Get the simulation status.
+
+        :returns: bool
+        """
+        return self._simulate
+
+    def set_simulate(self, status):
+        """Set the simulation status.
+
+        :param status: Value to set the simulation
+        :type status: bool
+        :returns: None
+        :raises: InvalidInput
+        """
+        if type(status) != bool:
+            raise InvalidInput("Status value must be bool")
+        self._simulate = bool2int(status)

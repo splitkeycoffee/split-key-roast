@@ -80,7 +80,7 @@ class IntegrationTwitterbot(Form):
 
     """Integration Twitter Bot form validator."""
 
-    status = BooleanField('status', [validators.required()])
+    status = BooleanField('status')
     consumer_key = StringField('consumer_key', [validators.required()])
     consumer_secret = StringField('consumer_secret', [validators.required()])
     access_token_key = StringField('access_token_key', [validators.required()])
