@@ -78,8 +78,9 @@ $(document).ready(function () {
                 if (this.point) {
                     return '';
                 }
-                return '<b>' + this.points[0].series.name + ':</b> ' + Highcharts.numberFormat(this.points[0].y, -1) + '<br/>' +
-                        '<b>' + this.points[1].series.name + ':</b> ' + Highcharts.numberFormat(this.points[1].y, -1) + '<br/>';
+                return '<b>' + this.points[0].series.name + ':</b> ' + Highcharts.numberFormat(this.points[0].y, 2) + '<br/>' +
+                        '<b>' + this.points[1].series.name + ':</b> ' + Highcharts.numberFormat(this.points[1].y, 2) + '<br/>' +
+                        '<b>Time:</b> ' + Highcharts.numberFormat(this.points[1].x, 2) + '<br/>';
             },
             borderColor: '#000000',
             style: {
