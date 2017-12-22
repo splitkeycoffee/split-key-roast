@@ -141,7 +141,31 @@
       <div id="auxiliary" class="graph"></div>
       <hr/>
       <div class="row sub-row">
-        <div class=col-md-12>
+        <div class=col-md-5>
+          <h4 style="text-align: center;">Details</h4>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Event</th>
+                  <th>Bean Temperatures</th>
+                  <th>Delta</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for key, value in details.iteritems() %}
+                <tr>
+                  <td>{{key}}</td>
+                  <td>({{value['first']['bean_temp_str']}}, {{value['last']['bean_temp_str']}})</td>
+                  <td>{{value.get('delta', "N/A")}} ({{value.get('percent', "0")}}%)</td>
+                  <td></td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class=col-md-7>
           <h4 style="text-align: center;">Brews <a href="/brews"><i class="fa fa-link" aria-hidden="true"></i></a></h4>
             {% if brews|count > 0 %}
             <div class="table-responsive">
@@ -182,9 +206,6 @@
             </div>
             {% endif %}
         </div>
-<!--         <div class=col-md-6>
-          <h4 style="text-align: center;">Cuppings</h4>
-        </div> -->
       </div>
     </main>
   </div>

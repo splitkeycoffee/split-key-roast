@@ -1,4 +1,5 @@
 """Calls related to roasting."""
+import math
 from . import core
 from .. import logger, mongo
 from ..libs.utils import paranoid_clean, now_time
@@ -6,6 +7,7 @@ from bson.objectid import ObjectId
 from flask import current_app as app
 from flask import render_template, jsonify, request
 from flask_login import login_required, current_user
+from collections import OrderedDict
 
 
 @core.route('/roast')
@@ -70,9 +72,51 @@ def historic_roast(roast_id):
         brews.append(x)
     brews.sort(key=lambda x: x['datetime'], reverse=True)
 
+    details = OrderedDict({'state': {'last': -1, 'previous': None}})
+    for idx, p in enumerate(item['events']):
+        if not p['config'].get('valid', True):
+            continue
+
+        round_time = int(p['time'])
+        config = p['config']
+        config['bean_temp_str'] = ("%.2f" % config['bean_temp'])
+        config['environment_temp_str'] = ("%.2f" % config['environment_temp'])
+
+        if 'event' in p:
+            details[p['event']] = dict()
+            details[p['event']]['first'] = config
+            details[p['event']]['last'] = config
+            continue
+
+        if not details.has_key(round_time):
+            details[round_time] = dict()
+            details[round_time]['first'] = config
+            if round_time == 1:
+                details[round_time - 1]['last'] = details['state']['previous']
+                l = details[round_time - 1]['last']['bean_temp']
+                f = details[round_time - 1]['first']['bean_temp']
+                details[round_time - 1]['delta'] = (l - f)
+                details[round_time - 1]['percent'] = int(((l - f) / float(f)) * 100)
+
+        if round_time > details['state']['last']:
+            if round_time > 0:
+                details[round_time - 1]['last'] = details['state']['previous']
+                l = details[round_time - 1]['last']['bean_temp']
+                f = details[round_time - 1]['first']['bean_temp']
+                details[round_time - 1]['delta'] = (l - f)
+                details[round_time - 1]['percent'] = int(((l - f) / float(f)) * 100)
+            details['state']['last'] = round_time
+
+        if (idx == len(item['events']) - 1):
+            details[round_time]['last'] = config
+
+        details['state']['previous'] = config
+
+    del details['state']
+
     return render_template('historic_roast.html', roast=item,
                            inventory=inventory, derived=derived,
-                           cuppings=cuppings, brews=brews)
+                           cuppings=cuppings, brews=brews, details=details)
 
 
 @core.route('/roast/update-properties', methods=['POST'])
