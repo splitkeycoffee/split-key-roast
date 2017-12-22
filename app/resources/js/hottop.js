@@ -170,6 +170,12 @@ $(document).ready(function() {
             $('.reset').prop("disabled", false);
             $("#fan-slider").slider("disable");
             $("#heat-slider").slider("disable");
+        } else if (data.activity === "DRY_END") {
+            mainChart.series[2].addPoint({
+                x: data.state.last.time,
+                title: 'DE (' + data.state.last.bean_temp.toFixed(0) + ")",
+                text: "Dry End"
+            });
         } else if (data.activity === "FIRST_CRACK") {
             mainChart.series[2].addPoint({
                 x: data.state.last.time,
@@ -229,6 +235,11 @@ $(document).ready(function() {
         if (debug) { console.log("Monitoring ends"); }
         socket.emit('stop-monitor');
         stopwatch.stop();
+    });
+
+    $('.dry-end').click(function() {
+        socket.emit('dry-end');
+        $(this).prop("disabled", true);
     });
 
     $('.fc').click(function() {

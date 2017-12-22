@@ -117,6 +117,16 @@ def on_reset():
     sio.emit('activity', activity)
 
 
+@sio.on('dry-end')
+def on_dry_end():
+    """Register the dry end event."""
+    logger.debug("Dry End")
+    state = ht.add_roast_event({'event': 'Dry End'})
+    activity = {'activity': 'DRY_END', 'state': state}
+    sio.emit('activity', activity)
+    return activity
+
+
 @sio.on('first-crack')
 @tweet_hook
 def on_first_crack():
