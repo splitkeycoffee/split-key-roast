@@ -35,6 +35,7 @@ def historic_roast(roast_id):
     if not item:
         return jsonify({'success': False, 'message': 'No such roast.'})
     item['id'] = str(item['_id'])
+    item['notes'] = item['notes'].replace('\n', ' ')
     derived = {'s1': list(), 's2': list(), 's3': list(), 's4': list(),
                'flags': list()}
     for p in item['events']:

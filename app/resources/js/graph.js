@@ -134,6 +134,22 @@ $(document).ready(function () {
             max: 550,
             gridLineColor: '#e5e5e5',
         },
+        // yAxis: [{
+        //     title: {
+        //         text: 'Temperature'
+        //     },
+        //     min: 0,
+        //     max: 550,
+        //     gridLineColor: '#e5e5e5',
+        // }, {
+        //     title: {
+        //         text: 'Delta'
+        //     },
+        //     min: 0,
+        //     max: 50,
+        //     gridLineColor: '#e5e5e5',
+        //     opposite: true
+        // }],
         exporting:{
             chartOptions:{
                 legend:{
@@ -153,7 +169,7 @@ $(document).ready(function () {
             name: 'Bean Temperature',
             color: '#020c7d',
             data: [],
-            id: 'bt'
+            id: 'bt',
         }, {
             name: 'Events',
             type: 'flags',
@@ -162,7 +178,15 @@ $(document).ready(function () {
             onSeries: 'bt',
             yAxis: 0,
             id: 'events'
-        }]
+        }
+        // ,{
+        //     name: 'Delta',
+        //     color: 'green',
+        //     data: [],
+        //     id: 'delta',
+        //     yAxis: 1
+        // }
+        ]
     });
 
     auxChart = Highcharts.chart('auxiliary', {
