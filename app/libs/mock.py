@@ -22,9 +22,9 @@ class MockProcess(Thread):
             self._config = self._q.get()
 
         while not self.exit.is_set():
-            self._log.debug("Thread pulse")
+            # self._log.debug("Thread pulse")
             self._config = data.pop()
-            self._log.debug(self._config)
+            # self._log.debug(self._config)
             self._cb(self._config['config'])  # This gives us a way to know when to read
 
             if self.cooldown.is_set():

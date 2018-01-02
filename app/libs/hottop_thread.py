@@ -48,12 +48,14 @@ from collections import deque
 class InvalidInput(Exception):
 
     """Exception to capture invalid input commands."""
+
     pass
 
 
 class SerialConnectionError(Exception):
 
     """Exception to capture serial connection issues."""
+
     pass
 
 
@@ -154,7 +156,7 @@ class ControlProcess(Thread):
 
         :returns: Byte array of the prepared configuration.
         """
-        config = bytearray([0x00]*36)
+        config = bytearray([0x00] * 36)
         config[0] = 0xA5
         config[1] = 0x96
         config[2] = 0xB0
@@ -262,7 +264,7 @@ class ControlProcess(Thread):
             settings['cooling_motor'] = hex2int(buffer[18])
             settings['chaff_tray'] = hex2int(buffer[19])
             self._retry_count = 0
-        except Exception as e:
+        except Exception:
             self._log.error("Pulled a cache configuration!")
             settings = self._generate_config()
         return settings
@@ -377,7 +379,7 @@ class Hottop:
     STOPBITS = 1
     TIMEOUT = 1
     LOG_LEVEL = logging.DEBUG
-    INTERVAL = 0.6
+    INTERVAL = 0.5
 
     def __init__(self):
         """Start of the hottop."""
@@ -390,6 +392,8 @@ class Hottop:
         self._roast_end = None
         self._config = dict()
         self._window = deque(list(), 5)
+        self._deltas = list()
+        self._temp_window = deque([-1 for x in range(0, 120)], 120)
         self._q = Queue()
         self._init_controls()
 
@@ -495,7 +499,7 @@ class Hottop:
         self._roast['duration'] = -1
         self._roast['notes'] = None
         self._roast['events'] = list()
-        self._roast['last'] = dict()
+        self._roast['last'] = None
         self._roast['record'] = False
         self._roast['charge'] = None
         self._roast['turning_point'] = None
@@ -532,8 +536,26 @@ class Hottop:
             self._roast['events'].append(copied)
             self._roast['last'] = local
 
+            # if self._roast.get('charge'):
+            # if len(self._deltas) == 0:
+            #     self._log.debug("Hit the turning point")
+            #     output['config']['delta_bean_temp'] = 1
+
+            if self._temp_window[0] != -1:
+                output['alt_time'] = ((td.total_seconds() + 60) / 60) - 1.5
+                delta = (local['bean_temp'] - self._temp_window[0])
+                # delta = int((delta / float(self._temp_window[0])) * 100)
+                delta = int(round(local['bean_temp'] - self._temp_window[0]))
+                if int(self._roast['duration'][3:]) % 10 == 0:
+                    output['config']['delta_bean_temp'] = delta
+                self._log.debug("%s - %s = %s"
+                    % (local['bean_temp'], self._temp_window[0], delta))
+                self._deltas.append(delta)
+
+            self._temp_window.append(local['bean_temp'])
+
         if self._user_callback:
-            self._log.debug("Passing data back to client handler")
+            # self._log.debug("Passing data back to client handler")
             output['roast'] = self._roast
             output['roasting'] = self._roasting
             if local.get('valid', True):
@@ -898,7 +920,6 @@ class Hottop:
             raise InvalidInput("Cooling motor value must be bool")
         self._config['cooling_motor'] = bool2int(cooling_motor)
         self._q.put(self._config)
-
 
     def get_simulate(self):
         """Get the simulation status.
