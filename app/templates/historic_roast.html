@@ -24,7 +24,7 @@
                 </div>
                 <div class="form-group">
                   <label class="col-form-label" for="formGroupExampleInput2">Output (grams)</label>
-                  <input type="number" class="form-control" id="output-weight" name="output-weight" min="-1" max="500" placeholder="185" value="-1">
+                  <input type="number" class="form-control" id="output-weight" name="output-weight" step="0.1" placeholder="185.0">
                 </div>
                 <div class="form-group">
                   <label class="col-form-label" for="formGroupExampleInput2">Notes</label>
@@ -156,7 +156,7 @@
               {% for key, value in details.iteritems() %}
                 <tr>
                   <td>{{key}}</td>
-                  <td>({{value['first']['bean_temp_str']}}, {{value['last']['bean_temp_str']}})</td>
+                  <td>({{value.get('first', {}).get('bean_temp_str', 'N/A')}}, {{value.get('last', {}).get('bean_temp_str', 'N/A')}})</td>
                   <td>{{value.get('delta', "N/A")}} ({{value.get('percent', "0")}}%)</td>
                   <td></td>
                 </tr>
