@@ -227,11 +227,16 @@
 
     <script type="text/javascript">
     $(document).ready(function () {
-      mainChart.series[0].setData({{derived['s1']}});
-      mainChart.series[1].setData({{derived['s2']}});
-      mainChart.series[2].setData({{derived['flags']|safe}});
-      auxChart.series[0].setData({{derived['s3']}});
-      auxChart.series[1].setData({{derived['s4']}});
+      mainChart.series[0].setData({{derived['s1']}}); // environment
+      mainChart.series[1].setData({{derived['s2']}}); // bean
+      mainChart.series[2].setData({{derived['flags']|safe}}); // flags
+      mainChart.series[3].setData({{derived['s5']}}); // delta bean
+      mainChart.series[4].setData({{derived['s6']}}); // delta environment
+      auxChart.series[0].setData({{derived['s3']}}); // fan
+      auxChart.series[1].setData({{derived['s4']}}); // heat
+
+      mainChart.xAxis[0].setExtremes(0, mainChart.xAxis[0].getExtremes().dataMax);
+      auxChart.xAxis[0].setExtremes(0, auxChart.xAxis[0].getExtremes().dataMax);
 
       $('#operator').val("{{roast.get('operator')}}");
       $('#input-weight').val("{{roast.get('input_weight')}}");
@@ -250,6 +255,7 @@
                       output: ${properties.output_weight}`;
       mainChart.setTitle({text: "{{roast.get('name')}}"},
                          {text: subtitle});
+      mainChart.redraw();
     });
 
     $('#roast-properties-form').bind("submit", function(e) {

@@ -136,6 +136,9 @@ $(document).ready(function() {
 
         mainChart.series[0].addPoint([data.time, data.config.environment_temp]);
         mainChart.series[1].addPoint([data.time, data.config.bean_temp]);
+        if (data.config.delta_bean_temp){
+            mainChart.series[3].addPoint([data.alt_time, data.config.delta_bean_temp]);
+        }
         // Normalize the fan data set to match the scale of heat
         auxChart.series[0].addPoint([data.time, data.config.main_fan * 10]);
         auxChart.series[1].addPoint([data.time, data.config.heater]);
