@@ -37,7 +37,7 @@ def historic_roast(roast_id):
     item['id'] = str(item['_id'])
     item['notes'] = item['notes'].replace('\n', ' ')
     derived = {'s1': list(), 's2': list(), 's3': list(), 's4': list(),
-               'flags': list()}
+               's5': list(), 's6': list(), 'flags': list()}
     for p in item['events']:
         if 'event' in p:
             label = "%s (%d, %d)" % (p['event'],
@@ -84,9 +84,9 @@ def historic_roast(roast_id):
         config['environment_temp_str'] = ("%.2f" % config['environment_temp'])
 
         if 'event' in p:
-            details[p['event']] = dict()
-            details[p['event']]['first'] = config
-            details[p['event']]['last'] = config
+            # details[p['event']] = dict()
+            # details[p['event']]['first'] = config
+            # details[p['event']]['last'] = config
             continue
 
         if not details.has_key(round_time):
@@ -105,6 +105,10 @@ def historic_roast(roast_id):
                 l = details[round_time - 1]['last']['bean_temp']
                 f = details[round_time - 1]['first']['bean_temp']
                 details[round_time - 1]['delta'] = (l - f)
+                l = details[round_time - 1]['last']['environment_temp']
+                f = details[round_time - 1]['first']['environment_temp']
+                derived['s5'].append([p['time'], details[round_time - 1]['delta']])
+                derived['s6'].append([p['time'], l - f])
                 details[round_time - 1]['percent'] = int(((l - f) / float(f)) * 100)
             details['state']['last'] = round_time
 

@@ -104,7 +104,7 @@ $(document).ready(function () {
                 stops: [
                     [0, '#ffffff'],
                     [.254, '#ffffff'],
-                    [.255, '#efe8e0'],
+                    [.255, '#eae4dd'],
                     [.394, '#efe8e0'],
                     [.395, '#fef1da'],
                     [.529, '#fef1da'],
@@ -131,14 +131,14 @@ $(document).ready(function () {
                 text: 'Temperature'
             },
             min: 0,
-            max: 550,
+            max: 500,
             gridLineColor: '#e5e5e5',
         }, {
             title: {
                 text: 'Delta'
             },
-            min: 0,
-            max: 50,
+            min: -5,
+            max: 100,
             gridLineColor: '#e5e5e5',
             opposite: true
         }],
@@ -171,10 +171,17 @@ $(document).ready(function () {
             yAxis: 0,
             id: 'events'
         },{
-            name: 'Delta',
-            color: 'green',
+            name: 'Delta Bean Temperature',
+            color: 'purple',
             data: [],
-            id: 'delta',
+            id: 'delta_bt',
+            yAxis: 1,
+            dashStyle: 'ShortDash'
+        },{
+            name: 'Delta Environment Temperature',
+            color: 'orange',
+            data: [],
+            id: 'delta_et',
             yAxis: 1,
             dashStyle: 'ShortDash'
         }]
@@ -193,14 +200,21 @@ $(document).ready(function () {
                 'text': 'Minutes'
             }
         },
-        yAxis: {
-            max: 110,
+        yAxis: [{
+            max: 100,
             min: 0,
             gridLineColor: '#e5e5e5',
             title: {
                 text: 'Power'
             },
-        },
+        }, {
+            title: {
+                text: 'Power'
+            },
+            min: 0,
+            max: 100,
+            opposite: true
+        }],
         exporting:{
             chartOptions:{
                 legend:{
