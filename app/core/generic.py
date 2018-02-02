@@ -1,7 +1,7 @@
 """Generic calls within the application."""
 from . import core
 from .. import mongo, logger
-from ..libs.utils import paranoid_clean
+from ..libs.utils import paranoid_clean, now_date, load_date
 from .forms import AccountSettingsForm, ChangePasswordForm
 from bson.objectid import ObjectId
 from flask import current_app as app
@@ -28,6 +28,7 @@ def root():
     history = list()
     for x in items:
         x['id'] = str(x['_id'])
+        x['rest_days'] = (now_date(False) - load_date(x['date'])).days
         history.append(x)
     history.sort(key=lambda x: x['end_time'], reverse=True)
 

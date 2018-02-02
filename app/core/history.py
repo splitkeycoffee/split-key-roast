@@ -1,7 +1,7 @@
 """Calls related to the roasting history."""
 from . import core
 from .. import mongo
-from ..libs.utils import paranoid_clean
+from ..libs.utils import paranoid_clean, now_date, load_date
 from bson.objectid import ObjectId
 from flask import current_app as app
 from flask import render_template, jsonify, request
@@ -17,6 +17,7 @@ def history():
     output = list()
     for x in items:
         x['id'] = str(x['_id'])
+        x['rest_days'] = (now_date(False) - load_date(x['date'])).days
         output.append(x)
     output.sort(key=lambda x: x['end_time'], reverse=True)
     return render_template('history.html', history=output)

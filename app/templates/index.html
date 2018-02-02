@@ -32,15 +32,17 @@
                     <th>Quantity</th>
                     <th>Duration</th>
                     <th>Date</th>
+                    <th>Days Rested</th>
                   </tr>
                 </thead>
                 <tbody>
-                {% for item in history %}
+                {% for item in history[:5] %}
                   <tr id="{{ item.get('id') }}">
                     <td><a href="/roast/{{item.get('id')}}">{{item.get('name')}}</a></td>
                     <td>{{item.get('input_weight')}}</td>
                     <td>{{item.get('duration')}}</td>
                     <td>{{item.get('date')}}</td>
+                    <td>{{item.get('rest_days')}}</td>
                   </tr>
                 {% endfor %}
                 </tbody>
