@@ -252,7 +252,8 @@
 
       var subtitle = `{{roast.get('date')}}, ${properties.operator},
                       input: ${properties.input_weight},
-                      output: ${properties.output_weight}`;
+                      output: ${properties.output_weight},
+                      duration: {{roast.get('duration')}}`;
       mainChart.setTitle({text: "{{roast.get('name')}}"},
                          {text: subtitle});
       mainChart.redraw();
