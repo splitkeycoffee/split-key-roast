@@ -38,7 +38,7 @@ def root():
     for x in items:
         x['id'] = str(x['_id'])
         inventory.append(x)
-    inventory.sort(key=lambda x: x['stock'], reverse=False)
+    inventory.sort(key=lambda x: x['stock'], reverse=True)
 
     return render_template('index.html', history=history, inventory=inventory)
 
