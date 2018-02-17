@@ -7,6 +7,10 @@ body {
   padding-top: 3.5rem;
 }
 
+nav.navbar {
+  max-height: 43px;
+}
+
 /*
  * Typography
  */
@@ -23,7 +27,7 @@ h1 {
 
 .sidebar {
   position: fixed;
-  top: 51px;
+  top: 25px;
   bottom: 0;
   left: 0;
   /*z-index: 1000;*/

@@ -255,6 +255,31 @@ $(document).ready(function() {
         $(this).prop("disabled", true);
     });
 
+    $('.zero-heat').click(function() {
+        $("#heat-slider").slider("value", 0);
+        $('#heat-handle').text(0);
+    });
+
+    $('.heat-minus-10').click(function() {
+        var current = parseInt($("#heat-handle").text());
+        var adjusted = current - 10;
+        if (adjusted < 0) {
+            adjusted = 0;
+        }
+        $("#heat-slider").slider("value", adjusted);
+        $('#heat-handle').text(adjusted);
+    });
+
+    $('.fan-plus-1').click(function() {
+        var current = parseInt($("#fan-handle").text());
+        var adjusted = current + 1;
+        if (adjusted >= 10) {
+            adjusted = 10;
+        }
+        $("#fan-slider").slider("value", adjusted);
+        $('#fan-handle').text(adjusted);
+    });
+
     $('.drop').click(function() {
         if (debug) { console.log("Drop Initiated"); }
         socket.emit('drop');
