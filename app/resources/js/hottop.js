@@ -258,6 +258,7 @@ $(document).ready(function() {
     $('.zero-heat').click(function() {
         $("#heat-slider").slider("value", 0);
         $('#heat-handle').text(0);
+        socket.emit('heater', 0);
     });
 
     $('.heat-minus-10').click(function() {
@@ -268,6 +269,7 @@ $(document).ready(function() {
         }
         $("#heat-slider").slider("value", adjusted);
         $('#heat-handle').text(adjusted);
+        socket.emit('heater', adjusted);
     });
 
     $('.fan-plus-1').click(function() {
@@ -278,6 +280,7 @@ $(document).ready(function() {
         }
         $("#fan-slider").slider("value", adjusted);
         $('#fan-handle').text(adjusted);
+        socket.emit('main-fan', adjusted);
     });
 
     $('.drop').click(function() {
