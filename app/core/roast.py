@@ -19,6 +19,10 @@ def active_roast():
     output = list()
     for x in items:
         x['id'] = str(x['_id'])
+        if int(x['stock']) < 100:
+            continue
+        if app.config['SIMULATE_ROAST'] and x['label'] != 'Test Beans':
+            continue
         output.append(x)
     output.sort(key=lambda x: x['datetime'], reverse=True)
     return render_template('roast.html', inventory=output)
@@ -84,32 +88,31 @@ def historic_roast(roast_id):
         config['environment_temp_str'] = ("%.2f" % config['environment_temp'])
 
         if 'event' in p:
-            # details[p['event']] = dict()
-            # details[p['event']]['first'] = config
-            # details[p['event']]['last'] = config
             continue
 
-        if not details.has_key(round_time):
+        if round_time not in details:
             details[round_time] = dict()
             details[round_time]['first'] = config
             if round_time == 1:
                 details[round_time - 1]['last'] = details['state']['previous']
-                l = details[round_time - 1]['last']['bean_temp']
-                f = details[round_time - 1]['first']['bean_temp']
-                details[round_time - 1]['delta'] = (l - f)
-                details[round_time - 1]['percent'] = int(((l - f) / float(f)) * 100)
+                last = details[round_time - 1]['last']['bean_temp']
+                first = details[round_time - 1]['first']['bean_temp']
+                details[round_time - 1]['delta'] = (last - first)
+                total = int(((last - first) / float(first)) * 100)
+                details[round_time - 1]['percent'] = total
 
         if round_time > details['state']['last']:
             if round_time > 0:
                 details[round_time - 1]['last'] = details['state']['previous']
-                l = details[round_time - 1]['last']['bean_temp']
-                f = details[round_time - 1]['first']['bean_temp']
-                details[round_time - 1]['delta'] = (l - f)
-                l = details[round_time - 1]['last']['environment_temp']
-                f = details[round_time - 1]['first']['environment_temp']
+                last = details[round_time - 1]['last']['bean_temp']
+                first = details[round_time - 1]['first']['bean_temp']
+                details[round_time - 1]['delta'] = (last - first)
+                last = details[round_time - 1]['last']['environment_temp']
+                first = details[round_time - 1]['first']['environment_temp']
                 derived['s5'].append([p['time'], details[round_time - 1]['delta']])
-                derived['s6'].append([p['time'], l - f])
-                details[round_time - 1]['percent'] = int(((l - f) / float(f)) * 100)
+                derived['s6'].append([p['time'], last - first])
+                total = int(((last - first) / float(first)) * 100)
+                details[round_time - 1]['percent'] = total
             details['state']['last'] = round_time
 
         if (idx == len(item['events']) - 1):

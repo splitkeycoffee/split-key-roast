@@ -56,9 +56,22 @@ $(document).ready(function () {
             points = [chart.series[0].searchPoint(event, true),
                       chart.series[1].searchPoint(event, true)]; // Get the hovered point
 
+            if (chart.series[3] && chart.series[4]) {
+                if (chart.series[3].points.length > 0
+                        && chart.series[4].points.length > 0) {
+                    points.push(chart.series[3].searchPoint(event, true));
+                    points.push(chart.series[4].searchPoint(event, true));
+                }
+            }
+
             if (points[0] && points[1]) {
                 points[0].onMouseOver(); // Show the hover marker
                 points[1].onMouseOver(); // Show the hover marker
+
+                if (points[2] && points[3]) {
+                    points[2].onMouseOver();
+                    points[3].onMouseOver();
+                }
                 chart.tooltip.refresh(points); // Show the tooltip
                 chart.xAxis[0].drawCrosshair(e, points[0]); // Show the crosshair
             }
@@ -78,9 +91,14 @@ $(document).ready(function () {
                 if (this.point) {
                     return '';
                 }
-                return '<b>' + this.points[0].series.name + ':</b> ' + Highcharts.numberFormat(this.points[0].y, 2) + '<br/>' +
-                        '<b>' + this.points[1].series.name + ':</b> ' + Highcharts.numberFormat(this.points[1].y, 2) + '<br/>' +
-                        '<b>Time:</b> ' + Highcharts.numberFormat(this.points[1].x, 2) + '<br/>';
+                var tip = '<b>' + this.points[0].series.name + ':</b> ' + Highcharts.numberFormat(this.points[0].y, 2) + '<br/>'
+                tip += '<b>' + this.points[1].series.name + ':</b> ' + Highcharts.numberFormat(this.points[1].y, 2) + '<br/>';
+                if (this.points[2] && this.points[3]) {
+                    tip += '<b>' + this.points[2].series.name + ':</b> ' + Highcharts.numberFormat(this.points[2].y, 2) + '<br/>';
+                    tip += '<b>' + this.points[3].series.name + ':</b> ' + Highcharts.numberFormat(this.points[3].y, 2) + '<br/>';
+                }
+                tip += '<b>Time:</b> ' + Highcharts.numberFormat(this.points[1].x, 2) + '<br/>';
+                return tip
             },
             borderColor: '#000000',
             style: {

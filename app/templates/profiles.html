@@ -81,7 +81,7 @@
             <tr id="{{item.get('id')}}">
               <td>{{item.get('coffee')}}</td>
               <td>{{item.get('roast').title()}}</td>
-              <td>{{item.get('brew_methods')|join(',')| replace('_', ' ')}}</td>
+              <td>{{item.get('brew_methods')|join(', ')| replace('_', ' ')}}</td>
               <td>{{item.get('drop_temp')}}</td>
               <td>{{item.get('datetime')}}</td>
               <td>

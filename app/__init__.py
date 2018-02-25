@@ -50,6 +50,8 @@ def tweet_hook(func):
         bot = integrations.get('twitter_bot')
         if not bot.get('status'):
             return results
+        if app.config['SIMULATE_ROAST']:
+            return results
 
         creative_ref = copy.deepcopy(creatives)
         action = func.func_name
