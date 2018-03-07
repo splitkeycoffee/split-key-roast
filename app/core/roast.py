@@ -2,7 +2,7 @@
 import math
 from . import core
 from .. import logger, mongo
-from ..libs.utils import paranoid_clean, now_time
+from ..libs.utils import paranoid_clean, now_time, search_list
 from bson.objectid import ObjectId
 from flask import current_app as app
 from flask import render_template, jsonify, request
@@ -41,7 +41,9 @@ def historic_roast(roast_id):
     item['id'] = str(item['_id'])
     item['notes'] = item['notes'].replace('\n', ' ')
     derived = {'s1': list(), 's2': list(), 's3': list(), 's4': list(),
-               's5': list(), 's6': list(), 'flags': list()}
+               's5': list(), 's6': list(), 'flags': list(),
+               'observations': list(), 'periods': {'tp2dry': None,
+               'dry2fc': None, 'fc2sc': None, 'sc2end': None, 'fc2end': None}}
     for p in item['events']:
         if 'event' in p:
             label = "%s (%d, %d)" % (p['event'],
@@ -88,6 +90,7 @@ def historic_roast(roast_id):
         config['environment_temp_str'] = ("%.2f" % config['environment_temp'])
 
         if 'event' in p:
+            derived['observations'].append(p)
             continue
 
         if round_time not in details:
@@ -121,6 +124,33 @@ def historic_roast(roast_id):
         details['state']['previous'] = config
 
     del details['state']
+
+    tp = search_list(derived['observations'], 'event', 'Turning Point')
+    dry = search_list(derived['observations'], 'event', 'Dry End')
+    fc = search_list(derived['observations'], 'event', 'First Crack')
+    sc = search_list(derived['observations'], 'event', 'Second Crack')
+    drop = search_list(derived['observations'], 'event', 'Drop')
+    tp2dry = "<b>Drying</b><br>"
+    tp2dry += str(int((dry['time'] - tp['time']) / drop['time'] * 100)) + "%"
+    derived['periods']['tp2dry'] = {'from': tp['time'], 'to': dry['time'],
+                                    'label': {'text': tp2dry},
+                                    'color': '#fcf1dd7d'}
+    dry2fc = "<b>Roasting</b><br>"
+    dry2fc += str(int((fc['time'] - dry['time']) / drop['time'] * 100)) + "%"
+    derived['periods']['dry2fc'] = {'from': dry['time'], 'to': fc['time'],
+                                    'label': {'text': dry2fc, 'z-index': 99},
+                                    'color': '#d9b59496'}
+    if sc:
+        sc2end = "<b>Development</b><br>"
+        sc2end += str(int((drop['time'] - fc['time']) / drop['time'] * 100)) + "%"
+        derived['periods']['sc2end'] = {'from': fc['time'], 'to': drop['time'],
+                                        'label': {'text': sc2end},
+                                        'color': '#fff52247'}
+    fc2end = "<b>Development</b><br>"
+    fc2end += str(int((drop['time'] - fc['time']) / drop['time'] * 100)) + "%"
+    derived['periods']['fc2end'] = {'from': fc['time'], 'to': drop['time'],
+                                    'label': {'text': fc2end},
+                                        'color': '#fff52247'}
 
     return render_template('historic_roast.html', roast=item,
                            inventory=inventory, derived=derived,

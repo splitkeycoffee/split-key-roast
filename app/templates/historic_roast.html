@@ -218,6 +218,7 @@
       });
       $('#roast-controls').show().css('visibility', 'visible');
       $('#roast-export').show().css('visibility', 'visible');
+      var historic = true;
     </script>
     <script src="/resources/external/highcharts/highstock.js"></script>
     <script src="/resources/external/highcharts/modules/exporting.js"></script>
@@ -232,10 +233,27 @@
       mainChart.series[2].setData({{derived['flags']|safe}}); // flags
       mainChart.series[3].setData({{derived['s5']}}); // delta bean
       mainChart.series[4].setData({{derived['s6']}}); // delta environment
+      // var dlPoints = [[{{derived['periods']['tp2dry']['from']}}, 540],
+      //                 [{{derived['periods']['tp2dry']['to']}}, 540]];
+      // mainChart.series[5].setData(dlPoints); // dry line
+      // var rlPoints = [[{{derived['periods']['dry2fc']['from']}}, 540],
+      //                 [{{derived['periods']['dry2fc']['to']}}, 540]];
+      // mainChart.series[6].setData(rlPoints); // roast line
       auxChart.series[0].setData({{derived['s3']}}); // fan
       auxChart.series[1].setData({{derived['s4']}}); // heat
 
       mainChart.xAxis[0].setExtremes(0, mainChart.xAxis[0].getExtremes().dataMax);
+      mainChart.xAxis[0].addPlotBand({{derived['periods']['tp2dry']|safe}});
+      // auxChart.xAxis[0].addPlotBand({{derived['periods']['tp2dry']|safe}});
+      mainChart.xAxis[0].addPlotBand({{derived['periods']['dry2fc']|safe}});
+      // auxChart.xAxis[0].addPlotBand({{derived['periods']['dry2fc']|safe}});
+      {% if derived['periods']['sc2end'] %}
+      mainChart.xAxis[0].addPlotBand({{derived['periods']['sc2end']|safe}});
+      // auxChart.xAxis[0].addPlotBand({{derived['periods']['sc2end']|safe}});
+      {% else %}
+      mainChart.xAxis[0].addPlotBand({{derived['periods']['fc2end']|safe}});
+      // auxChart.xAxis[0].addPlotBand({{derived['periods']['fc2end']|safe}});
+      {% endif %}
       auxChart.xAxis[0].setExtremes(0, auxChart.xAxis[0].getExtremes().dataMax);
 
       $('#operator').val("{{roast.get('operator')}}");

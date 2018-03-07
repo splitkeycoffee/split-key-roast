@@ -8,10 +8,10 @@ def to_bool(value):
     :type value: str
     :returns: converted string to a real bool
     """
-    positive = ("yes", "y", "true",  "t", "1")
+    positive = ("yes", "y", "true", "t", "1")
     if str(value).lower() in positive:
         return True
-    negative = ("no",  "n", "false", "f", "0", "0.0", "", "none", "[]", "{}")
+    negative = ("no", "n", "false", "f", "0", "0.0", "", "none", "[]", "{}")
     if str(value).lower() in negative:
         return False
     raise Exception('Invalid value for boolean conversion: ' + str(value))
@@ -67,3 +67,13 @@ def timedelta2period(duration):
     minutes = (seconds % 3600) // 60
     seconds = (seconds % 60)
     return '{0:0>2}:{1:0>2}'.format(minutes, seconds)
+
+
+def search_list(l, k, v):
+    """Search a list for an entry with a specific value."""
+    for item in l:
+        if k not in item:
+            continue
+        if item[k] == v:
+            return item
+    return None

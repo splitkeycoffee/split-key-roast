@@ -1,5 +1,6 @@
 var mainChart;
 var auxChart;
+var historic = false;
 
 $(document).ready(function () {
     Highcharts.getSVG = function(charts, options, callback) {
@@ -113,8 +114,14 @@ $(document).ready(function () {
         }
     });
 
-    mainChart = Highcharts.chart('container', {
-        chart: {
+    var chartInit;
+    if (historic) {
+        chartInit = {
+            type: 'spline',
+            animation: Highcharts.svg,
+        }
+    } else {
+        chartInit = {
             type: 'spline',
             animation: Highcharts.svg,
             backgroundColor: {
@@ -131,7 +138,11 @@ $(document).ready(function () {
                     [.100, '#ffffff']
                 ]
             },
-        },
+        }
+    }
+
+    mainChart = Highcharts.chart('container', {
+        chart: chartInit,
         title: {
             text: ''
         },
@@ -143,6 +154,7 @@ $(document).ready(function () {
             min: 0,
             gridLineColor: '#e5e5e5',
             gridLineWidth: 1,
+            plotBands: []
         },
         yAxis: [{
             title: {
@@ -188,14 +200,14 @@ $(document).ready(function () {
             onSeries: 'bt',
             yAxis: 0,
             id: 'events'
-        },{
+        }, {
             name: 'Delta Bean Temperature',
             color: 'purple',
             data: [],
             id: 'delta_bt',
             yAxis: 1,
             dashStyle: 'ShortDash'
-        },{
+        }, {
             name: 'Delta Environment Temperature',
             color: 'orange',
             data: [],
