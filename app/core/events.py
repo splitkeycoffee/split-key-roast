@@ -62,6 +62,7 @@ def on_setup():
 
 
 @sio.on('roaster-shutdown')
+@tweet_hook
 def on_shutdown():
     """End the connection with the roaster."""
     ht.end()
@@ -87,8 +88,9 @@ def on_stop_monitor():
     state = ht.get_roast_properties()
     c = mongo.db[app.config['HISTORY_COLLECTION']]
     state['user'] = current_user.get_id()
-    c.insert(state)
+    mid = c.insert(state)
     state.pop('_id', None)  # Removes the injected mongo ID
+    state['roast_id'] = str(mid)
     c = mongo.db[app.config['INVENTORY_COLLECTION']]
     _id = c.update({'label': state.get('coffee').split(' - ')[1]},
                    {'$inc': {'stock': -int(state.get('input_weight'))}})

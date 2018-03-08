@@ -87,7 +87,7 @@
       <div id="roast-controls">
         <h4 class="sidebar-header">Controls  <i id="monitor-status" class="fa fa-circle disconnected" aria-hidden="true"></i></h4>
         <button class="btn btn-sm btn-success toggle-control margin-bottom-10 start-monitor" type="button" action="true" disabled>Start Monitor</button>
-        <button class="btn btn-sm btn-warning toggle-control margin-bottom-10 stop-monitor" type="button" action="true" disabled>Stop Monitor</button>
+        <button class="btn btn-sm btn-warning toggle-control margin-bottom-10 stop-monitor save-svg" type="button" action="true" disabled>Stop Monitor</button>
 
         <h5 class="sidebar-header">Fan</h5>
         <div id="fan-slider" class="slider">
@@ -113,6 +113,8 @@
         <h4 class="sidebar-header">Export</h4>
         <button id="export-png" class="btn btn-sm btn-secondary toggle-control margin-bottom-10">Graph</button>
       </div>
+
+      <input type="hidden" id="roast-id" value="">
     </nav>
 
     <main role="main" class="col-sm-9 ml-sm-auto col-md-10 pt-3">
@@ -223,6 +225,7 @@
       $('#roast-properties-form').bind("submit", function(e) {
         e.preventDefault();
         if (!e.target.checkValidity()) {
+          console.error("Form invalid")
           return false;
         }
         var today = new Date();
@@ -239,6 +242,7 @@
                         output: ${properties.output_weight}`;
         $('#graph-subtitle').val(subtitle);
         mainChart.setTitle({text: $('#graph-title').val()}, {text: subtitle});
+        console.log(properties);
         socket.emit('roast-properties', properties);
         $('#roastPropertiesModal').modal('hide');
         $('#roast-controls').show().css('visibility', 'visible');

@@ -153,7 +153,7 @@
                 </tr>
               </thead>
               <tbody>
-              {% for key, value in details.iteritems() %}
+              {% for key, value in details.items() %}
                 <tr>
                   <td>{{key}}</td>
                   <td>({{value.get('first', {}).get('bean_temp_str', 'N/A')}}, {{value.get('last', {}).get('bean_temp_str', 'N/A')}})</td>

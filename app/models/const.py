@@ -33,6 +33,9 @@ creatives = {
         'Target temperature reached, time to drop!',
         'Ah, the sweet smell of freshly roasted coffee!'
     ],
+    'on_shutdown': [
+        'Charting of the roast.'
+    ],
     'hash_tags': ['#coffee', '#homeroasting', '#specialtycoffee', '#liveroast',
                   '#coffeetech', '#greencoffee', '#roastupdates', '#roastbot',
                   '#autoroast', '#hottop', '#bot', '#splitkeycoffee',

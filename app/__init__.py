@@ -10,17 +10,18 @@ from flask import Flask, redirect, url_for
 from flask_login import LoginManager, current_user
 from flask_pymongo import PyMongo
 from flask_socketio import SocketIO
-from models.const import creatives
-from models.user import User
+from .models.const import creatives
+from .models.user import User
+from .libs.utils import now_date
 from pyhottop.pyhottop import Hottop
 # from libs.hottop_thread import Hottop
 import copy
 import eventlet
 import logging
+import os
 import random
 import socketio
 import sys
-import twitter
 
 mgr = socketio.RedisManager('redis://')
 sio = SocketIO(client_manager=mgr)
@@ -38,6 +39,9 @@ logger.addHandler(shandler)
 
 eventlet.monkey_patch()
 
+# Must import post monkey patching to avoid issues with requests library
+import twitter
+
 
 def tweet_hook(func):
     """Decorate to run tweets if the integration is enabled."""
@@ -50,13 +54,14 @@ def tweet_hook(func):
         bot = integrations.get('twitter_bot')
         if not bot.get('status'):
             return results
-        if app.config['SIMULATE_ROAST']:
-            return results
+        # if app.config['SIMULATE_ROAST']:
+        #     return results
 
         creative_ref = copy.deepcopy(creatives)
-        action = func.func_name
-        base = creative_ref.get(func.func_name)
+        action = func.__name__
+        base = creative_ref.get(func.__name__)
         creative = None
+        media = None
         if action == 'on_start_monitor' and bot.get('tweet_roast_begin'):
             state = results['state']
             creative = base[random.randint(0, len(base) - 1)]
@@ -74,6 +79,11 @@ def tweet_hook(func):
             creative += " State: ET %d, BT %d, Time %s " % (
                 last['environment_temp'], last['bean_temp'],
                 results['state']['duration'])
+        if (action == 'on_shutdown' and bot.get('tweet_roast_complete')):
+            creative = base[random.randint(0, len(base) - 1)]
+            creative += " "
+            media_path = os.path.dirname(__file__) + "/resources/tmp/"
+            media = media_path + now_date(str=True) + "-roast.png"
 
         if not creative:
             # Didn't trigger any of the actions or they weren't enabled
@@ -82,7 +92,7 @@ def tweet_hook(func):
         tags = 0
         tag_count = random.randint(2, 8)
         hashtags = creative_ref.get('hash_tags')
-        while len(creative) <= 130:
+        while len(creative) <= 250:
             if tags == tag_count:
                 break
             hashtag = hashtags[random.randint(0, len(hashtags) - 1)]
@@ -91,12 +101,21 @@ def tweet_hook(func):
             tags += 1
 
         # Tweeting code
-        api = twitter.Api(consumer_key=bot.get('consumer_key'),
-                          consumer_secret=bot.get('consumer_secret'),
-                          access_token_key=bot.get('access_token_key'),
-                          access_token_secret=bot.get('access_token_secret'))
+        api = twitter.Api(consumer_key=str(bot.get('consumer_key')),
+                          consumer_secret=str(bot.get('consumer_secret')),
+                          access_token_key=str(bot.get('access_token_key')),
+                          access_token_secret=str(bot.get('access_token_secret')))
+
         try:
-            api.PostUpdate(creative)
+            creative = unicode(creative, "utf-8")
+        except:
+            creative = str(creative)
+
+        try:
+            if not media:
+                api.PostUpdate(creative)
+            else:
+                api.PostUpdate(creative, media=open(media, 'rb'))
         except Exception as e:
             logger.error(str(e))
         return results

@@ -29,7 +29,7 @@ def now_date(str=True):
     """Get the current date and return it back to the app."""
     import datetime
     if str:
-        return datetime.date.datetime().strftime("%Y-%m-%d")
+        return datetime.datetime.now().strftime("%Y-%m-%d")
     return datetime.datetime.now()
 
 

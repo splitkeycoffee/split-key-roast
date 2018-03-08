@@ -36,12 +36,27 @@ $(document).ready(function () {
         exportChart(0);
     };
 
-    Highcharts.exportCharts = function (charts, options) {
+    Highcharts.exportCharts = function (charts, options, download=true, roast_id=null) {
         options = Highcharts.merge(Highcharts.getOptions().exporting, options);
         Highcharts.getSVG(charts, options, function (svg) {
-            Highcharts.downloadSVGLocal(svg, options, function () {
-                console.log("Failed to export on client side");
+            $.ajax({
+              url: '/roast/send-svg',
+              type: 'post',
+              dataType: 'json',
+              contentType:'application/json',
+              data: JSON.stringify({'svg': svg}),
+              success: function(data) {
+                if (data.success) {
+                  console.log("Done");
+                }
+              }
             });
+
+            if (download) {
+                Highcharts.downloadSVGLocal(svg, options, function () {
+                    console.log("Failed to export on client side");
+                });
+            }
         });
     };
 
@@ -269,6 +284,10 @@ $(document).ready(function () {
     });
 
     $('#export-png').click(function () {
-      Highcharts.exportCharts([mainChart, auxChart]);
+      Highcharts.exportCharts([mainChart, auxChart], {}, true);
+    });
+
+    $('.save-svg').click(function () {
+      Highcharts.exportCharts([mainChart, auxChart], {}, false);
     });
 });

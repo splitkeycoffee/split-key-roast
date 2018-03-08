@@ -1,8 +1,11 @@
 """Calls related to roasting."""
+import cairosvg
 import math
+import os
+import random
 from . import core
 from .. import logger, mongo
-from ..libs.utils import paranoid_clean, now_time, search_list
+from ..libs.utils import paranoid_clean, now_time, search_list, now_date
 from bson.objectid import ObjectId
 from flask import current_app as app
 from flask import render_template, jsonify, request
@@ -26,6 +29,17 @@ def active_roast():
         output.append(x)
     output.sort(key=lambda x: x['datetime'], reverse=True)
     return render_template('roast.html', inventory=output)
+
+
+@core.route('/roast/send-svg', methods=['POST'])
+@login_required
+def send_svg():
+    """Render the roast page."""
+    state = request.get_json()
+    path = os.path.dirname(__file__).replace('core', 'resources/tmp')
+    filename = path + "/" + now_date(str=True) + "-roast.png"
+    cairosvg.svg2png(bytestring=state['svg'], write_to=filename)
+    return jsonify({'success': True})
 
 
 @core.route('/roast/<roast_id>')
