@@ -1,13 +1,16 @@
-FROM python:2.7
+FROM python:3.8.5-buster
 
 WORKDIR /code
 EXPOSE 80
 
+RUN apt-get update && apt-get install -y python3-pandas
+
 COPY requirements.txt .
-RUN pip2 install -r requirements.txt
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
 COPY server.py .
 COPY app/ app/
-#RUN python2 -m compileall .
+RUN python -m compileall .
 
-CMD ["python2", "-u", "server.py", "run"]
+CMD ["python", "server.py", "run"]

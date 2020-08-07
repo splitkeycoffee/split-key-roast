@@ -15,3 +15,5 @@ dump.rdb
 .notes
 tools/*
 .idea/
+mongo-data/
+!mongo-data/.gitkeep

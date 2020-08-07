@@ -14,3 +14,4 @@ venv3/*
 dump.rdb
 .notes
 tools/*
+mongo-data/
