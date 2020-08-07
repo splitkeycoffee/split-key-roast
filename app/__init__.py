@@ -107,7 +107,7 @@ def tweet_hook(func):
                           access_token_secret=str(bot.get('access_token_secret')))
 
         try:
-            creative = unicode(creative, "utf-8")
+            creative = str(creative, "utf-8")
         except:
             creative = str(creative)
 
