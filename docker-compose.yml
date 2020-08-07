@@ -1,0 +1,23 @@
+version: '3'
+
+networks:
+  host:
+
+services:
+  web:
+    image: coffee
+    networks:
+      - host
+    ports:
+      - 80:80
+    depends_on:
+      - redis
+      - mongo
+  redis:
+    image: "redis:alpine"
+    ports:
+    - 6379:6379
+  mongo:
+    image: "mongo:3.4-xenial"
+    ports:
+    - 27017:27017
