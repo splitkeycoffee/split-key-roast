@@ -41,7 +41,7 @@ def edit_profile():
                 'brew_methods': form.brew_methods.data, 'tags': list()}
         c.update({'_id': ObjectId(edit_id)}, {'$set': item})
         return redirect(url_for('core.profiles'))
-    errors = ','.join([value[0] for value in form.errors.values()])
+    errors = ','.join([value[0] for value in list(form.errors.values())])
     return jsonify({'errors': errors})
 
 

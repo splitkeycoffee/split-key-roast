@@ -19,12 +19,9 @@ def main():
     app = create_app(**kwargs)
 
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.bind(('0.0.0.0', 6379))
-        print("[!] Redis server does not appear to be running, EXITING")
-        sys.exit(1)
+        app.redis.setex('testasdf', 1, 42)
     except Exception as e:
-        pass
+        raise Exception("failed to contact redis", e)
 
     sio.run(app, host="0.0.0.0", port=80)
 

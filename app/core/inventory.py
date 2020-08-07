@@ -39,7 +39,7 @@ def add_inventory():
                 'datetime': now_time(), 'user': current_user.get_id()}
         _id = c.insert(item)
         return redirect(url_for('core.inventory'))
-    errors = ','.join([value[0] for value in form.errors.values()])
+    errors = ','.join([value[0] for value in list(form.errors.values())])
     return jsonify({'errors': errors})
 
 
@@ -61,7 +61,7 @@ def edit_inventory():
                 }
         c.update({'_id': ObjectId(edit_id)}, {'$set': item})
         return redirect(url_for('core.inventory'))
-    errors = ','.join([value[0] for value in form.errors.values()])
+    errors = ','.join([value[0] for value in list(form.errors.values())])
     return jsonify({'errors': errors})
 
 
