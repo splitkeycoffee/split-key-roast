@@ -1,15 +1,16 @@
 version: '3'
 
 networks:
-  host:
+  web-stack:
 
 services:
   web:
     image: coffee
     environment:
-      - MONGO_HOST=mongo
+      - MONGO_URI=mongodb://mongo/cloud_cafe
+      - REDIS_HOST=redis
     networks:
-      - host
+      - web-stack
     ports:
       - 80:80
     links:
@@ -20,7 +21,7 @@ services:
     ports:
     - 6379:6379
     networks:
-      - host
+      - web-stack
   mongo:
     image: bitnami/mongodb
     ports:
@@ -28,4 +29,4 @@ services:
     volumes:
     - ./mongo-data/:/bitnami/mongodb/data/db/
     networks:
-      - host
+      - web-stack
