@@ -22,8 +22,9 @@ import os
 import random
 import socketio
 import sys
+from redis import Redis
 
-mgr = socketio.RedisManager('redis://')
+mgr = socketio.RedisManager('redis://' + os.environ.get('REDIS_HOST'))
 sio = SocketIO(client_manager=mgr)
 login_manager = LoginManager()
 mongo = PyMongo()
@@ -107,7 +108,7 @@ def tweet_hook(func):
                           access_token_secret=str(bot.get('access_token_secret')))
 
         try:
-            creative = unicode(creative, "utf-8")
+            creative = str(creative, "utf-8")
         except:
             creative = str(creative)
 
@@ -155,6 +156,9 @@ def create_app(debug=False, simulate=False):
     app.config['PROFILE_COLLECTION'] = 'profiles'
     app.config['USERS_COLLECTION'] = 'accounts'
     app.config['SIMULATE_ROAST'] = simulate
+    app.config['MONGO_URI'] = os.environ.get('MONGO_URI')
+    app.config['REDIS_HOST'] = os.environ.get('REDIS_HOST')
+    app.redis = Redis(host='redis')
     login_manager.init_app(app)
     mongo.init_app(app)
     sio.init_app(app)

@@ -37,7 +37,7 @@ from .mock import MockProcess
 py2 = sys.version[0] == '2'
 
 if py2:
-    from Queue import Queue
+    from queue import Queue
 else:
     from queue import Queue
 
@@ -758,7 +758,7 @@ class Hottop:
             raise InvalidInput("Properties value must be of dict")
         valid = ['name', 'input_weight', 'output_weight', 'operator', 'notes',
                  'coffee']
-        for key, value in settings.iteritems():
+        for key, value in settings.items():
             if key not in valid:
                 continue
             self._roast[key] = value
@@ -815,7 +815,7 @@ class Hottop:
         :returns: None
         :raises: InvalidInput
         """
-        if type(heater) != int and heater not in range(0, 101):
+        if type(heater) != int and heater not in list(range(0, 101)):
             raise InvalidInput("Heater value must be int between 0-100")
         self._config['heater'] = heater
         self._q.put(self._config)
@@ -835,7 +835,7 @@ class Hottop:
         :returns: None
         :raises: InvalidInput
         """
-        if type(fan) != int and fan not in range(0, 11):
+        if type(fan) != int and fan not in list(range(0, 11)):
             raise InvalidInput("Fan value must be int between 0-10")
         self._config['fan'] = fan
         self._q.put(self._config)
@@ -855,7 +855,7 @@ class Hottop:
         :returns: None
         :raises: InvalidInput
         """
-        if type(main_fan) != int and main_fan not in range(0, 11):
+        if type(main_fan) != int and main_fan not in list(range(0, 11)):
             raise InvalidInput("Main fan value must be int between 0-10")
         self._config['main_fan'] = main_fan
         self._q.put(self._config)

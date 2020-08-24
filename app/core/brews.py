@@ -74,7 +74,7 @@ def add_brew():
                 'days_since_roast': td.days}
         c.insert(item)
         return redirect(url_for('core.brews'))
-    errors = ','.join([value[0] for value in form.errors.values()])
+    errors = ','.join([value[0] for value in list(form.errors.values())])
     return jsonify({'errors': errors})
 
 
@@ -104,7 +104,7 @@ def edit_brew():
                 'tasting_notes': form.tasting_notes.data}
         c.update({'_id': ObjectId(edit_id)}, {'$set': item})
         return redirect(url_for('core.brews'))
-    errors = ','.join([value[0] for value in form.errors.values()])
+    errors = ','.join([value[0] for value in list(form.errors.values())])
     return jsonify({'errors': errors})
 
 

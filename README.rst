@@ -12,7 +12,18 @@ Supported roasters:
 .. _pyhottop: https://github.com/splitkeycoffee/pyhottop
 
 Getting Started
----------------
+===============
+
+Docker
+------
+To run a complete application stack with data persisted to the 'mongo-data' directory:
+
+    $ docker-compose up
+
+
+Locally
+-------
+
 Checkout this project, change directories and create a new virtual environment for Python:
 
     $ virtualenv -p /usr/bin/python2.7 venv

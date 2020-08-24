@@ -72,7 +72,7 @@ def update_account():
                 'email': form.email.data}
         c.update({'_id': ObjectId(edit_id)}, {'$set': item})
         return redirect(url_for('core.settings'))
-    errors = ','.join([value[0] for value in form.errors.values()])
+    errors = ','.join([value[0] for value in list(form.errors.values())])
     return jsonify({'errors': errors})
 
 
@@ -90,7 +90,7 @@ def account_change_password():
         item = {'password': generate_password_hash(form.password.data)}
         c.update({'_id': ObjectId(edit_id)}, {'$set': item})
         return redirect(url_for('core.settings'))
-    errors = ','.join([value[0] for value in form.errors.values()])
+    errors = ','.join([value[0] for value in list(form.errors.values())])
     return jsonify({'errors': errors})
 
 

@@ -22,7 +22,7 @@ def login():
             login_user(user_obj, remember=True)
             next = request.args.get('next')
             return redirect(next or url_for('core.root'))
-    errors = ','.join([value[0] for value in form.errors.values()])
+    errors = ','.join([value[0] for value in list(form.errors.values())])
     return render_template('login.html', message=errors)
 
 
@@ -62,7 +62,7 @@ def register():
         _id = c.insert(user)
         next = request.args.get('next')
         return redirect(next or url_for('core.login'))
-    errors = ','.join([value[0] for value in form.errors.values()])
+    errors = ','.join([value[0] for value in list(form.errors.values())])
     return render_template('register.html', message=errors)
 
 
