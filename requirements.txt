@@ -53,7 +53,7 @@ s3transfer==0.3.3
 scipy==1.5.2
 six==1.15.0
 tinycss2==1.0.2
-urllib3==1.25.10
+urllib3==1.26.5
 webencodings==0.5.1
 Werkzeug==1.0.1
 WTForms==2.3.3
